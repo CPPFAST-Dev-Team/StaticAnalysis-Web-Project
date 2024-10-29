@@ -1,15 +1,13 @@
 from rest_framework import serializers
-from .models import Project
+from .models import AnalysisResult
 
-class ProjectSerializer(serializers.ModelSerializer):
-    #owner_username = serializers.SerializerMethodField()
-    #optional field to display the owner's username, custom method custom serialization logic
-    users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+class AnalysisResultSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the AnalysisResult model.
 
+    This serializer handles the conversion between AnalysisResult instances and their JSON representations.
+    """
     class Meta:
-        model = Project
-        fields = ['id', 'name', 'description', 'repository_url', 'owner', 'owner_username', 'created_at', 'updated_at', 'users']
-        read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
-
-    #def get_owner_username(self, obj):
-    #    return obj.owner.username
+        model = AnalysisResult
+        fields = ['id', 'project', 'timestamp', 'status', 'result']
+        read_only_fields = ['id', 'project', 'timestamp', 'status', 'result']
