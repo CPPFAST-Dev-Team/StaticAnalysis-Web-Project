@@ -1,13 +1,34 @@
 from django.db import models
-from django.contrib.auth.models import User
+from projects.models import Project  # Adjust this import if necessary
 
-class Project(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    repository_url = models.URLField()
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_projects')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    users = models.ManyToManyField(User, related_name='projects')
+class AnalysisResult(models.Model):
+    """
+    Represents the result of a static code analysis for a project.
+
+    :param project: The project associated with this analysis result
+    :type project: Project
+    :param timestamp: The time when the analysis was performed
+    :type timestamp: datetime
+    :param status: The current status of the analysis
+    :type status: str
+    :param result: The detailed result of the analysis
+    :type result: JSON
+    """
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='analysis_results')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed')
+    ], default='PENDING')
+    result = models.JSONField(null=True, blank=True)
+
     def __str__(self):
-        return self.name
+        """
+        Returns a string representation of the AnalysisResult.
+
+        :return: A string describing the analysis result
+        :rtype: str
+        """
+        return f"Analysis for {self.project.name} - {self.timestamp}"
