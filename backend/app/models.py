@@ -34,6 +34,15 @@ class Project(models.Model):
     token = models.CharField(max_length=30)
     team = models.CharField(max_length=30)
 
+    def __str__(self):
+        """
+        Returns a string representation of the Project.
+
+        :return: The name of the project
+        :rtype: str
+        """
+        return self.name
+
 class Vulnerability(models.Model):
     """
     Represents a vulnerability found in a project.
@@ -63,6 +72,15 @@ class Vulnerability(models.Model):
     severity = models.CharField(max_length=30)
     summary = models.CharField(max_length=200)
     confidence = models.DecimalField(max_digits=3, decimal_places=2)
+
+    def __str__(self):
+        """
+        Returns a string representation of the Vulnerability.
+
+        :return: A string describing the vulnerability
+        :rtype: str
+        """
+        return f"{self.name} in {self.project.name} - {self.severity}"
 
 class AnalysisResult(models.Model):
     """
@@ -95,3 +113,31 @@ class AnalysisResult(models.Model):
         :rtype: str
         """
         return f"Analysis for {self.project.name} - {self.timestamp}"
+
+# User Authentication Model
+class UserProfile(models.Model):
+    """
+    Represents additional user profile information.
+
+    :param user: The user associated with this profile
+    :type user: User
+    :param bio: A brief biography of the user
+    :type bio: str
+    :param location: The user's location
+    :type location: str
+    :param birth_date: The user's birth date
+    :type birth_date: date
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(max_length=500, blank=True)
+    location = models.CharField(max_length=30, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        """
+        Returns a string representation of the UserProfile.
+
+        :return: The username of the associated user
+        :rtype: str
+        """
+        return self.user.username
