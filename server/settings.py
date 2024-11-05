@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     'app',
     'static_analysis',
     'projects',
-    #'user_authentication',
+    'user_authentication',
     'rest_framework',
     'rest_framework.authtoken',
-    #
+    'vulnerabilities',
+    'analysis',
+    #'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
