@@ -2,28 +2,31 @@
   <div class="box">
     <div class="left">
       <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png">
-      <h2>{{ githubUrl }}</h2>
+      <a href="https://www.github.com"><h2>{{ githubUrl }}</h2></a>
     </div>
-
+ 
+ 
     <div class="center">
       <div class="innerBox">
         <h3>Issues: </h3>
         <div class="btn-group">
-          <button class="btn-red"><text>{{ issueRed }}</text></button>
-          <button class="btn-yellow"><text>{{ issueYellow }}</text></button>
-          <button class="btn-blue"><text>{{ issueBlue }}</text></button>
+          <router-link to="/issues" class="btn-red"><text>{{ issueRed }}</text></router-link>
+          <router-link to="/issues" class="btn-yellow"><text>{{ issueYellow }}</text></router-link>
+          <router-link to="/issues" class="btn-blue"><text>{{ issueBlue }}</text></router-link>
         </div>
       </div>
     </div>
-
+ 
+ 
     <div class="right">
-      <button class="btn-view"><text>Open</text></button>
+      <router-link to="/issues" class="btn-view"><text>Open</text></router-link>
     </div>
   </div>
-</template>
-
-<script>
-export default {
+ </template>
+ 
+ 
+ <script>
+ export default {
   name: "Display_project",
   props: {
     githubUrl: {
@@ -43,32 +46,44 @@ export default {
       required: true
     },
   },
-};
-</script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
-
-.box {
+ };
+ </script>
+ 
+ 
+ <style scoped>
+ @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+ 
+ 
+ .box {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   overflow: hidden;
-  width: 80vw;
-  height: 20vw;
-  border: 1px solid black;
+  width: 90%;
+  height: 20%;
+  min-width: 800px;
+  min-height: 200px;
+  max-width: 1200px;
+  max-height: 300px;
+  border: 1px solid #063970;
   padding: 10px;
   margin: 10px;
   border-radius: 50px;
-  font-family: 'DM Sans', sans-serif; /* Apply DM Sans to the whole box */
+  font-family: 'DM Sans', sans-serif;
 }
+ 
+ 
+ .left, .center, .right, .innerBox, h2, h3, button, a {
+  font-family: 'DM Sans', sans-serif;
+ }
 
-.left, .center, .right, .innerBox, h2, h3, button {
-  font-family: 'DM Sans', sans-serif; /* Ensure DM Sans applies to all inner elements */
-}
-
-.innerBox {
+ h2, h3{
+  color: black;
+ }
+ 
+ 
+ .innerBox {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -76,35 +91,38 @@ export default {
   overflow: hidden;
   width: 100%;
   height: 60%;
-  border: 1px solid black;
+  border: 1px solid #063970;
   padding: 10px;
   border-radius: 20px;
-}
-
-.left {
+ }
+ 
+ 
+ .left {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 35%;
+  justify-content: flex-start;
+  width: 30%;
   height: 100%;
-  padding: 5px;
   border: 1px solid transparent;
   border-radius: 15px;
-}
-
-.center {
+  padding: 16px;
+ }
+ 
+ 
+ .center {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50%;
+  width: 55%;
   height: 100%;
   margin: 0;
   padding: 5px;
   border: 1px solid transparent;
   border-radius: 15px;
-}
-
-.right {
+ }
+ 
+ 
+ .right {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,81 +132,103 @@ export default {
   padding: 5px;
   border: 1px solid transparent;
   border-radius: 15px;
-}
-
-img {
-  height: 20%;
-  width: 15%;
-  margin-right: 5%;
-}
-
-h2 {
-  font-size: 2vw;
-}
-
-h3 {
-  font-size: 1.5vw;
-  margin: 10px;
-}
-
-.btn-group {
+ }
+ 
+ 
+ img {
+  display: block;
+  width: 20%;
+  height: auto;
+  margin: 5%;
+ }
+ 
+ 
+ .btn-group {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   height: 50%;
   width: 100%;
-}
-
-.btn-group button {
+ }
+ 
+ 
+ .btn-group button, .btn-group a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 10px;
   height: 100%;
   width: 40%;
   border: 1px solid black;
   cursor: pointer;
   margin-right: 10px;
-}
-
-.btn-red {
+ }
+ 
+ 
+ .btn-red {
   background-color: #E51400;
   color: white;
-}
-
-.btn-yellow {
+ }
+ 
+ 
+ .btn-yellow {
   background-color: #FFFF66;
   color: black;
-}
-
-.btn-blue {
+ }
+ 
+ 
+ .btn-blue {
   background-color: #063970;
   color: white;
-}
-
-.btn-group:after {
+ }
+ 
+ 
+ .btn-group:after {
   content: "";
   clear: both;
   display: table;
-}
-
-.btn-view {
+ }
+ 
+ 
+ .btn-view {
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #063970;
   color: white;
   height: 15%;
-  width: 100%;
+  width: 80%;
   border-radius: 10px;
   cursor: pointer;
-}
-
-.btn-group button:hover, .btn-view:hover {
+ }
+ 
+ 
+ .btn-group button:hover, .btn-group a:hover, .btn-view:hover {
   opacity: 0.8;
-}
+ }
 
-text {
-  margin: 5px;
-  font-size: 1.5vw;
-}
+ a h2:hover{
+  text-decoration: underline;
+ }
+ 
+ 
+ h2 {
+  font-size: clamp(1rem, 5%, 3rem);
+  margin: 10px;
+ }
 
-</style>
+
+  h3 {
+  font-size: clamp(1rem, 2%, 1rem);
+  margin: 10px;
+ }
+
+
+  text {
+    font-size: clamp(0.8rem, 1%, 1rem);
+  }
+ 
+ 
+ </style>
+ 

@@ -62,13 +62,13 @@ export default {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  width: 80%;
+  width: 90%;
   height: 20%;
   min-width: 800px;
   min-height: 200px;
   max-width: 1200px;
   max-height: 300px;
-  border: 1px solid black;
+  border: 1px solid #063970;
   padding: 10px;
   margin: 10px;
   border-radius: 50px;
@@ -85,7 +85,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  width: 20%;
+  width: 15%;
   height: 100%;
   margin: 0;
   padding: 5px;
@@ -107,7 +107,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30%;
+  width: 25%;
   height: 100%;
   margin: 0;
   padding: 5px;
