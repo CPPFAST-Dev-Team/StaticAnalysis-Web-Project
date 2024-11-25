@@ -4,7 +4,7 @@
     </head>
     <div class="input-container">
         <div class="header">
-            <h1>New Scan of Github.com/example </h1>
+            <h1>New Scan of Placeholder.com/example </h1>
         </div>
 
         <div class="input-group">
@@ -18,30 +18,32 @@
 
         <div class="input-group">
             <label>Commit</label>
-            <input type="text"><br><br>
+            <input type="text" v-model="commit"><br><br>
         </div>
 
         <div class="create">
-            <button class="createbtn">
-                <span>Initiate</span>
-            </button>
+            <router-link to="/issues" class="createbtn">
+                <text>Initiate</text>
+            </router-link>
         </div>
         
     </div>
 </template>
 
 <script>
-import { ref } from "vue";
 import Dropdown from "../components/Dropdown.vue";
 
-const options = ref(["Branch1","Branch2"])
-const parentSelectedOption = ref(null)
 export default {
     data(){
         return{
-            options,
-            parentSelectedOption
+            options: [],
+            parentSelectedOption: null,
+            commit: "",
         };
+    },
+    created(){
+        //get request to backend api for project branches
+        this.options = ["Branch1", "Frontend Branch", "Another Branch"];
     },
     components: {
         Dropdown
@@ -116,11 +118,17 @@ export default {
 }
 
 .createbtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 40%;
     height: 100%;
     background-color: #063970;
     color: white;
     border-radius: 10px;
     cursor: pointer;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
 }
 </style>

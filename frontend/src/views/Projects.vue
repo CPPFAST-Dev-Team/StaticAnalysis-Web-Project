@@ -4,29 +4,39 @@
             <h1>Projects</h1>
             <router-link to="/new-project" class="btn-create">Create New</router-link>
         </div>
-        <Display_project
-        githubUrl="Github.com/example"
-        :issueRed="1234"
-        :issueYellow="5678"
-        :issueBlue="9000"
-        />
-
-        <Display_project
-        githubUrl="Github.com/repo"
-        :issueRed="1234"
-        :issueYellow="5678"
-        :issueBlue="9000"
-        />
+        <div class="project-wrapper" v-for="project in projects">
+            <Display_project v-bind="project"/>
+        </div>
     </div>
     
 </template>
 
 <script>
     import Display_project from '../components/Display_project.vue'
-    import Navbar from '../components/Navbar.vue'
+    import {projects} from "../projectsData.js"
     export default{
+        data(){
+            return {
+                projects: [],
+                // parameters: 
+                // giithubUrl
+                // imgSrc
+                // issueRed
+                // issueYellow
+                // issueBlue
+            }
+        },
+        created(){
+            this.getProjects()
+        },
+        //backend api call here to get projects
+        methods: {
+            async getProjects(){
+                this.projects = projects;
+            }
+        },
         components: {
-            Display_project
+            Display_project 
         }
     }
 </script>
@@ -46,6 +56,11 @@
         justify-content: flex-start;
         align-items: center;
         padding: 50px;
+    }
+    .project-wrapper{
+        display: flex;
+        justify-content: center;
+        width: 100%;
     }
     .header{
         display: flex;
@@ -81,5 +96,8 @@
         color: white;
         font-size: 1rem;
         cursor: pointer;
+    }
+    .btn-create:hover{
+        opacity: 0.8;
     }
 </style>

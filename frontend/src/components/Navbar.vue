@@ -4,7 +4,7 @@
     </head>
     <div class="navbar">
         <div class="left">
-            <span>Code Assessor</span>
+            <router-link to="/"><text>Code Assessor</text></router-link>
         </div>
 
         <div class="right">
@@ -15,7 +15,6 @@
                 </button>
                 <div class="dropdown-content">
                     <router-link to="/projects">Projects</router-link>
-                    <router-link to="/issues">Issues</router-link>
                     <router-link to="/new-project">New Project</router-link>
                 </div>
             </div>
@@ -23,13 +22,15 @@
     </div>
 </template>
 
-<style>
+<style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
 .navbar {
     display: flex;
     flex-direction: row;
-    width: 100%;
+    width: 100vw;
+    min-height: 50px;
+    height: 5vh;
     background-color: white;
     border-top: 2px solid #063970;
     border-bottom: 2px solid #063970;
@@ -83,8 +84,9 @@
     right: 0;
 }
 
-.dropdown-content a, .dropdown-content router-link {
-    color: black;
+.dropdown-content a {
+    font-family: 'DM Sans', sans-serif;
+    color: #063970;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
@@ -99,7 +101,7 @@
     display: block;
 }
 
-.navbar span {
+.navbar text {
     font-family: 'DM Sans', sans-serif;
     font-size: clamp(1rem, 10%, 3rem);
     color: #063970;

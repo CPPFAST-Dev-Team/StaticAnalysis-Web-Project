@@ -17,7 +17,7 @@
             :key="index"
             @click="toggleOptionSelect(option)"
             >
-            {{ option }}
+              {{ option }}
             </div>
         </div>
     </div>
@@ -104,14 +104,14 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    width: 50%;
+    width: 90%;
 }
 .dropdown-selected-option-right{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-end;
-    width: 50%;
+    width: 10%;
 }
 
 .option{

@@ -3,23 +3,26 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <div class="input-container">
+        <div class="alert" v-if="showAlert">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+            <text class="alert-text">Username or password is incorrect. Please try again</text>
+        </div>
         <div class="icon-login">
             <i class="fa fa-user-o" aria-hidden="true"></i>
         </div>
         <div class="input-group">
             <label for="repo">Username</label>
-            <input type="text" id="frepo" name="user"><br><br>
+            <input type="text" v-model="username"><br><br>
         </div>
 
         <div class="input-group">
             <label for="token">Password</label>
-            <input type="text" id="ftoken" name="password"><br><br>
+            <input type="text" v-model="password"><br><br>
         </div>
 
         <div class="btn-group-login">
             <router-link to="/projects" class="loginbtn">Login</router-link>
-
-            <router-link to="/projects" class="registerbtn">Register</router-link>
+            <a class="registerbtn" @click="toggleAlert">Register</a>
         </div>
         
     </div>
@@ -27,7 +30,21 @@
 
 <script>
 export default{
-
+    data(){
+        return{
+            username: '',
+            password: '',
+            showAlert: false,
+        }
+    },
+    methods: {
+        toggleAlert(){
+            this.showAlert = true;
+            setTimeout(() => {
+                this.showAlert = false;
+            }, 3000);
+        }
+    }
 }
 </script>
 
@@ -38,6 +55,7 @@ export default{
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        font-family: 'DM Sans', sans-serif;
         min-width: 1024px;
         width: 100%;
         height: 75%;
@@ -106,6 +124,22 @@ export default{
         border: 1px solid #063970;
         border-radius: 10px;
         cursor: pointer;
+    }
+    .alert{
+        display: flex;
+        align-items: center;
+        height: 40px;
+        width: 50%;
+        background-color: #FFCCCB;
+        border: 1px solid red;
+    }
+    .alert i{
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    .alert text{
+        color: gray;
+        font-size: 20px;
     }
     text{
         text-decoration: none;

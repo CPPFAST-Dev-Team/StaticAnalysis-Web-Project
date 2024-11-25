@@ -7,7 +7,7 @@
     </div>
     <div class="center">
       <div class="btn-group">
-        <button class="btn-red"><text>CWE-123456</text></button>
+        <button class="btn-red"><text>{{ issueName }}</text></button>
         <button class="btn-red"><text>Severity: High</text></button>
       </div>
       <div class="text-space">
@@ -28,35 +28,33 @@
 export default {
   name: "Display_issue",
   props:{
-      fileName:{
-          type: String,
-          required: true,
-      },
-      line:{
-          type: Number,
-          required: true,
-      },
-      errorText:{
-          type: String,
-          required: true,
-      },
-      confidence:{
-          type: Number,
-          required: true,
-      },
+    fileName:{
+      type: String,
+      required: true,
+    },
+    issueName:{
+      type: String,
+      required: true,
+    },
+    line:{
+      type: Number,
+      required: true,
+    },
+    errorText:{
+      type: String,
+      required: true,
+    },
+    confidence:{
+      type: Number,
+      required: true,
+    },
   }
 }
 </script>
 
  <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
-.container{
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-}
- .box {
+.box {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -74,13 +72,7 @@ export default {
   border-radius: 50px;
   font-family: 'DM Sans', sans-serif;
 }
- .left, .center, .right {
-  font-family: 'DM Sans', sans-serif;
-}
- h2, h3, button, .text-space, .btn-view {
-  font-family: 'DM Sans', sans-serif;
-}
- .left {
+.left {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -92,7 +84,7 @@ export default {
   border: 1px solid transparent;
   border-radius: 15px;
 }
- .center {
+.center {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,7 +95,7 @@ export default {
   border: 1px solid transparent;
   border-radius: 15px;
 }
- .right {
+.right {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,6 +106,8 @@ export default {
   border: 1px solid transparent;
   border-radius: 15px;
 }
+
+/* button styles */
  .btn-group {
   display: flex;
   flex-direction: column;
@@ -139,22 +133,28 @@ export default {
   white-space: nowrap;
   text-align: center;
 }
- .btn-red {
+/* issues high, medium, and low */
+.btn-group .btn-red { 
   background-color: #E51400;
   border-color: darkred;
   color: white;
 }
- .btn-blue {
+.btn-group .btn-yellow {
+  background-color: #FFFF66;
+  color: black;
+}
+.btn-group .btn-blue {
   background-color: #063970;
   border-color: black;
   color: white;
 }
- .btn-white {
+.btn-group .btn-white {
   background-color: white;
-  border-color: transparent;
+  border-color: #063970;
   color: black;
 }
- .btn-view {
+/* separate smaller button for opening issue */
+.btn-view {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -162,13 +162,15 @@ export default {
   color: white;
   height: 15%;
   width: 30%;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
 }
- .btn-group button:hover, .btn-view:hover {
+.btn-group button:hover, .btn-view:hover {
   opacity: 0.8;
 }
- .text-space {
+
+/* text area */
+.text-space {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -177,18 +179,20 @@ export default {
   width: 130%;
   overflow:auto;
 }
+
+/* text styles */
 h2 {
-font-size: clamp(1rem, 2%, 1rem);
-margin: 10px;
+  display: inline-block;
+  font-size: clamp(1rem, 2%, 1rem);
+  margin: 10px;
+  margin-right: 5px;
+  margin-left: 5px;
+  word-break: break-word;
 }
-
-
 h3 {
   font-size: clamp(1rem, 2%, 1rem);
   margin: 10px;
 }
-
-
 text {
   font-size: clamp(0.8rem, 1%, 1rem);
 }

@@ -19,19 +19,26 @@
  
  
     <div class="right">
-      <router-link to="/issues" class="btn-view"><text>Open</text></router-link>
+      <router-link to="/issues" class="btn-view">
+        <text>Open</text>
+      </router-link>
     </div>
   </div>
  </template>
  
  
  <script>
+ import Issues from '../views/Issues.vue';
  export default {
   name: "Display_project",
   props: {
     githubUrl: {
       type: String,
       required: true
+    },
+    imgSrc:{
+      type: String,
+      required: true,
     },
     issueRed: {
       type: Number,
@@ -139,7 +146,6 @@
   display: block;
   width: 20%;
   height: auto;
-  margin: 5%;
  }
  
  
@@ -216,6 +222,7 @@
  h2 {
   font-size: clamp(1rem, 5%, 3rem);
   margin: 10px;
+  word-break: break-word;
  }
 
 

@@ -9,12 +9,12 @@
 
         <div class="input-group">
             <label>Repo</label>
-            <input type="text"><br><br>
+            <input type="text" v-model="repo"><br><br>
         </div>
 
         <div class="input-group">
             <label>Token</label>
-            <input type="text"><br><br>
+            <input type="text" v-model="token"><br><br>
         </div>
 
         <div class="input-group">
@@ -27,26 +27,29 @@
         </div>
 
         <div class="create">
-            <button class="createbtn">
+            <router-link to="/projects" class="createbtn">
                 <span>Create</span>
-            </button>
+            </router-link>
         </div>
         
     </div>
 </template>
 
 <script>
-import { ref } from "vue";
 import Dropdown from "../components/Dropdown.vue";
 
-const options = ref(["Team1","Coders","Prompt Engineers"])
-const parentSelectedOption = ref(null)
 export default {
     data(){
         return{
-            options,
-            parentSelectedOption
+            repo: "",
+            token: "",
+            options: [],
+            parentSelectedOption: null,
         };
+    },
+    created(){
+        //backend api get teams from User
+        this.options=["Team1","Coders","Hackers"];
     },
     components: {
         Dropdown
@@ -121,11 +124,17 @@ export default {
 }
 
 .createbtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 40%;
     height: 100%;
     background-color: #063970;
     color: white;
     border-radius: 10px;
     cursor: pointer;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
 }
 </style>

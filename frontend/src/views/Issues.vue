@@ -1,29 +1,42 @@
 <template>
     <div class="container">
         <div class="header">
-        <h1>Github.com/example</h1>
-        <button class="btn-filter">Filter</button>
-        <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
-    </div>
-
-    <Issue
-        fileName="File.cpp"
-        :line="123"
-        errorText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate..."
-        :confidence="95"
-    />
-    <Issue
-        fileName="File.java"
-        :line="456"
-        errorText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate..."
-        :confidence="52"
-    />
+            <h1>{{ projectName }}</h1>
+            <button class="btn-filter">Filter</button>
+            <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
+        </div>
+        <div class="issue-wrapper" v-for="issue in issues">
+            <Issue v-bind="issue"/>
+        </div>
     </div>
 </template>
 
 <script>
 import Issue from '../components/Display_issue.vue'
+import { issues } from "../issuesData.js"
     export default{
+        data(){
+            return {
+                issues: [],
+                projectName: "",
+                // parameters: 
+                // fileName
+                // issueName
+                // line
+                // errorText
+                // confidence
+            }
+        },
+        created(){
+            this.getIssues()
+        },
+        //backend api call here to get issues
+        methods: {
+            async getIssues(){
+                this.issues = issues;
+                this.projectName = "Placeholder.com";
+            }
+        },
         components: {
             Issue 
         }
@@ -45,6 +58,12 @@ import Issue from '../components/Display_issue.vue'
     justify-content: flex-start;
     align-items: center;
     padding: 50px;
+    overflow: auto;
+}
+.issue-wrapper{
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 .header{
     display: flex;
@@ -84,5 +103,9 @@ h1{
 .btn-scan{
     background-color: white;
     color: #063970;
+}
+button:hover{
+    cursor: pointer;
+    opacity: 0.8;
 }
 </style>

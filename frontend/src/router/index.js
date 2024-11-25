@@ -18,9 +18,9 @@ const routes = [
         component: Projects
     },
     {
-        path:'/issues',
+        path:'/issues/',
         name:'Issues',
-        component: Issues
+        component: Issues,
     },
     {
         path:'/new-project',
