@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
-    'vulnerabilities',
-    'analysis',
+    #'vulnerabilities',
+    #'analysis',
     #'rest_framework_swagger',
 ]
 
