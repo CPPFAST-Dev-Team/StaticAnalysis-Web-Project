@@ -5,7 +5,11 @@
     <div class="input-container">
         <div class="alert" v-if="showAlert">
             <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-            <text class="alert-text">Username or password is incorrect. Please try again</text>
+            <text class="alert-text">{{alertOutput}}</text>
+        </div>
+        <div class="success" v-if="showSuccess">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+            <text class="alert-text">{{alertOutput}}</text>
         </div>
         <div class="icon-login">
             <i class="fa fa-user-o" aria-hidden="true"></i>
@@ -17,33 +21,115 @@
 
         <div class="input-group">
             <label for="token">Password</label>
-            <input type="text" v-model="password"><br><br>
+            <input type="password" v-model="password"><br><br>
         </div>
 
         <div class="btn-group-login">
-            <router-link to="/projects" class="loginbtn">Login</router-link>
-            <a class="registerbtn" @click="toggleAlert">Register</a>
+            <a class="loginbtn" @click="submitLogin">Login</a>
+            <a class="registerbtn" @click="submitRegister">Register</a>
         </div>
         
     </div>
 </template>
 
 <script>
+import axios from 'axios'
 export default{
     data(){
         return{
             username: '',
             password: '',
+            alertOutput: '',
             showAlert: false,
+            showSuccess: false,
         }
     },
     methods: {
+        async submitLogin(){
+            axios.defaults.headers.common["Authorization"] = ""
+
+            localStorage.removeItem("token")
+
+            const formData = {
+                username: this.username,
+                password: this.password
+            }
+
+            await axios
+                .post("api/auth/login/", formData)
+                .then(response => {
+                    const token = response.data.auth_token
+
+                    axios.defaults.headers.common["Authorization"] = "Token " + token
+                    localStorage.setItem("token", token)
+                    localStorage.setItem('username', this.username)
+                    this.$router.push('/projects')
+                })
+                .catch(error => {
+                    if (error.response) {
+                        console.log(error.response.data)
+                        if(error.response.data.error == 'Invalid credentials'){
+                            this.alertOutput = 'Invalid credentials. '
+                            this.toggleAlert()
+                        }
+                        else{
+                            this.alertOutput = 'Enter valid username and password. '
+                            this.toggleAlert()
+                        }
+                    } else {
+                        this.alertOutput = 'Something went wrong. Please try again. '
+                        this.toggleAlert()
+                        console.log(JSON.stringify(error))
+                    }
+                })
+        },
+        async submitRegister(){
+                if(this.username === ''){
+                    this.alertOutput = 'Enter a username. '
+                    this.toggleAlert()
+                }
+                else if(this.password === ''){
+                    this.alertOutput = 'Enter a password. '
+                    this.toggleAlert()
+                }
+                else{
+                    const formData = {
+                        username: this.username,
+                        password: this.password
+                    }
+
+                    axios
+                        .post("api/auth/register/", formData)
+                        .then(response => {
+                            this.alertOutput = "Account created, please login with same credentials."
+                            this.toggleSuccess()
+                        })
+                        .catch(error =>{
+                            if(error.response){
+                                if(error.response.data.username){
+                                    this.alertOutput = error.response.data.username[0];
+                                    this.toggleAlert();
+                                    console.log(JSON.stringify(error.response.data))
+                                }
+                            }
+                            this.alertOutput = 'Something went wrong. Please try again. '
+                            this.toggleAlert()
+                            console.log(JSON.stringify(error))
+                        })
+                }
+        },
         toggleAlert(){
             this.showAlert = true;
             setTimeout(() => {
                 this.showAlert = false;
             }, 3000);
-        }
+        },
+        toggleSuccess(){
+            this.showSuccess = true;
+            setTimeout(() => {
+                this.showSuccess = false;
+            }, 3000);
+        },
     }
 }
 </script>
@@ -69,7 +155,7 @@ export default{
         justify-content: center;
         margin-bottom: 15px;
     }
-    .input-group input[type="text"]{
+    .input-group input{
         height: 100%;
         width: 100%;
         min-height: 30px;
@@ -133,13 +219,21 @@ export default{
         background-color: #FFCCCB;
         border: 1px solid red;
     }
-    .alert i{
+    .alert i, .success i{
         margin-left: 10px;
         margin-right: 10px;
     }
-    .alert text{
-        color: gray;
+    .alert text, .success text{
+        color: darkslategrey;
         font-size: 20px;
+    }
+    .success{
+        display: flex;
+        align-items: center;
+        height: 40px;
+        width: 50%;
+        background-color: #0fb36f;
+        border: 1px solid green;
     }
     text{
         text-decoration: none;

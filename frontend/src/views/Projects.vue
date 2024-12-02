@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="header">
-            <h1>Projects</h1>
+            <h1>Projects, {{ username }}</h1>
             <router-link to="/new-project" class="btn-create">Create New</router-link>
         </div>
         <div class="project-wrapper" v-for="project in projects">
@@ -14,9 +14,11 @@
 <script>
     import Display_project from '../components/Display_project.vue'
     import {projects} from "../projectsData.js"
+    import axios from 'axios'
     export default{
         data(){
             return {
+                username: localStorage.getItem('username'),
                 projects: [],
                 // parameters: 
                 // giithubUrl
@@ -33,7 +35,7 @@
         methods: {
             async getProjects(){
                 this.projects = projects;
-            }
+            },
         },
         components: {
             Display_project 
