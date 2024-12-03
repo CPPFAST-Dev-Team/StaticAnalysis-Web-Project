@@ -6,7 +6,6 @@ from .serializers import ProjectSerializer
 import logging
 from django.contrib.auth.models import User
 
-
 logger = logging.getLogger(__name__)
 
 class ProjectListCreateView(generics.ListCreateAPIView):
@@ -17,10 +16,8 @@ class ProjectListCreateView(generics.ListCreateAPIView):
 
     :param request: The HTTP request object.
     :type request: rest_framework.request.Request
-
     :return: A list of projects or the created project details.
     :rtype: rest_framework.response.Response
-
     :raises: Exception if there's an error during project listing or creation.
     """
     queryset = Project.objects.all()
@@ -44,9 +41,17 @@ class ProjectListCreateView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         try:
-            response = super().create(request, *args, **kwargs)
-            logger.info(f"User {request.user.username} created a new project: {response.data.get('name', 'Unknown')}")
-            return response
+            repo = request.data.get('repo')
+            token = request.data.get('token')
+            
+            # Add logic here to validate repo and token
+            
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            logger.info(f"User {request.user.username} created a new project: {serializer.data.get('name', 'Unknown')}")
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         except Exception as e:
             logger.error(f"Error creating project for user {request.user.username}: {str(e)}")
             return Response({"error": "An error occurred while creating the project"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -61,10 +66,8 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     :type request: rest_framework.request.Request
     :param pk: The primary key of the project.
     :type pk: int
-
     :return: The project details, updated project details, or a success message.
     :rtype: rest_framework.response.Response
-
     :raises: Project.DoesNotExist if the project is not found.
     :raises: Exception if there's an error during project operations.
     """
@@ -121,7 +124,6 @@ class UserProjectListView(generics.ListAPIView):
     :type request: rest_framework.request.Request
     :param user_id: The ID of the user whose projects are to be listed.
     :type user_id: int
-
     :return: A list of projects associated with the specified user.
     :rtype: rest_framework.response.Response
     """
@@ -141,10 +143,8 @@ class ProjectUserAddView(generics.UpdateAPIView):
     :type request: rest_framework.request.Request
     :param pk: The primary key of the project.
     :type pk: int
-
     :return: A success message if the user is added, or an error message if the user is not found.
     :rtype: rest_framework.response.Response
-
     :raises: User.DoesNotExist if the specified user is not found.
     """
     queryset = Project.objects.all()
@@ -160,3 +160,68 @@ class ProjectUserAddView(generics.UpdateAPIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+class InitiateScanView(generics.CreateAPIView):
+    """
+    Initiate a scan for a specific project.
+
+    This view provides a POST method to start a scan for a project.
+
+    :param request: The HTTP request object.
+    :type request: rest_framework.request.Request
+    :param project_id: The ID of the project to be scanned.
+    :type project_id: int
+    :return: A success message if the scan is initiated, or an error message if the project is not found.
+    :rtype: rest_framework.response.Response
+    :raises: Project.DoesNotExist if the specified project is not found.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        project_id = kwargs.get('project_id')
+        branch = request.data.get('branch')
+        commit = request.data.get('commit')
+
+        try:
+            project = Project.objects.get(id=project_id, owner=request.user)
+            # Add logic here to initiate the scan
+            # Update issue counts based on scan results
+            return Response({"message": "Scan initiated successfully"}, status=status.HTTP_200_OK)
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error initiating scan for project {project_id}: {str(e)}")
+            return Response({"error": "An error occurred while initiating the scan"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class LogoutView(generics.GenericAPIView):
+    """
+    Logout the user.
+
+    This view provides a POST method to log out the user.
+
+    :param request: The HTTP request object.
+    :type request: rest_framework.request.Request
+    :return: A success message if the user is logged out.
+    :rtype: rest_framework.response.Response
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Add logic here to log out the user
+        return Response({"message": "User logged out successfully"}, status=status.HTTP_200_OK)
+
+#class LogoutView(APIView):
+#    """
+#    API view for user logout.
+#
+#    This view handles POST requests for user logout by removing the user's token.
+#    
+#    :param request: The HTTP request object.
+#    :type request: rest_framework.request.Request
+#    :return: Response indicating successful logout.
+#    :rtype: rest_framework.response.Response
+#    """
+#    permission_classes = [IsAuthenticated] # Add this line to require authentication
+#
+#    def post(self, request):
+#        # Optionally handle token blacklisting here if needed
+#        return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
