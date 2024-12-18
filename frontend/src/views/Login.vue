@@ -62,7 +62,6 @@ export default{
 
                     axios.defaults.headers.common["Authorization"] = "Token " + token
                     localStorage.setItem("token", token)
-                    localStorage.setItem('username', this.username)
                     this.$router.push('/projects')
                 })
                 .catch(error => {
@@ -140,15 +139,20 @@ export default{
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
+        padding: 20px;
+        padding-top: 20vh;
         font-family: 'DM Sans', sans-serif;
-        min-width: 1024px;
+        min-width: 300px;
         width: 100%;
-        height: 75%;
+        height: 100%;
     }
     .input-group{
-        width: 40%;
-        height: 10%;
+        width: 90%;
+        height: 8%;
+        min-width: 250px;
+        max-width: 500px;
+        min-height: 50px;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
@@ -173,9 +177,9 @@ export default{
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 15%;
-        width: 15%;
-        margin: 15px;
+        height: 20%;
+        width: 20%;
+        margin-bottom: 20px;
     }
     .icon-login i{
         color:#063970;
@@ -187,15 +191,19 @@ export default{
         align-items: center;
         justify-content: space-evenly;
         width: 40%;
-        height: 15%;
+        height: 12%;
+        min-width: 250px;
+        max-width: 500px;
+        min-height: 100px;
     }
     .loginbtn, .registerbtn{
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
-        width: 60%;
+        width: 80%;
         height: 30%;
+        min-width: 200px;
         margin-bottom: 10px;
     }
     .loginbtn{

@@ -9,11 +9,11 @@
 
         <div class="right">
             
-            <div class="dropdown">
-                <button class="dropbtn">
+            <div class="dropdown" v-show="logged"  @mouseenter="hoverDropdown" @mouseleave="leaveDropdown">
+                <button class="dropbtn" @click="toggleDropdown">
                     <i class="fa fa-bars"></i>
                 </button>
-                <div class="dropdown-content">
+                <div class="dropdown-content" v-if="showDropdown">
                     <router-link to="/projects">Projects</router-link>
                     <router-link to="/new-project">New Project</router-link>
                 </div>
@@ -30,11 +30,10 @@
     flex-direction: row;
     width: 100vw;
     min-height: 50px;
-    height: 5vh;
+    height: 100%;
     background-color: white;
     border-top: 2px solid #063970;
     border-bottom: 2px solid #063970;
-    position: absolute;
     left: 0;
     right: 0;
     top: 0;
@@ -111,5 +110,33 @@
 <script>
 export default {
     name: "Navbar",
+    data(){
+        return{
+            showDropdown: false,
+            logged: false,
+        }
+    },
+    mounted(){
+        this.logged = !!localStorage.getItem('token');
+    },
+    methods: {
+        toggleDropdown(){
+            if(window.innerWidth < 768){
+                this.showDropdown = !this.showDropdown
+            }
+        },
+        hoverDropdown(){
+            if(!(window.innerWidth < 768))
+            {
+                this.showDropdown = true
+            }
+        },
+        leaveDropdown(){
+            if(!(window.innerWidth < 768))
+            {
+                this.showDropdown = false
+            }
+        },
+    }
 };
 </script>

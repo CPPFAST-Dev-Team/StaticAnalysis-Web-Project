@@ -7,24 +7,26 @@
             <h1>New Project</h1>
         </div>
 
-        <div class="input-group">
-            <label>Repo</label>
-            <input type="text" v-model="repo"><br><br>
-        </div>
+        <form class="input-group">
+            <label for="repo">Repo</label>
+            <input type="text" id="repo" v-model="repo">
+        </form>
 
-        <div class="input-group">
-            <label>Token</label>
-            <input type="text" v-model="token"><br><br>
-        </div>
+        <form class="input-group">
+            <label for="token">Token</label>
+            <input type="text" id="token" v-model="token">
+        </form>
 
-        <div class="input-group">
-            <label>Team</label>
+        <form class="input-group">
+            <label for="team">Team</label>
             <Dropdown
-            selectFiller="Select Team"
-            :options="options"
-            v-model="parentSelectedOption"
+                id="team"
+                selectFiller="Select Team"
+                :options="options"
+                v-model="parentSelectedOption"
             />
-        </div>
+        </form>
+
 
         <div class="create">
             <router-link to="/projects" class="createbtn">
@@ -61,17 +63,16 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
 .input-container {
-    position: relative;
-    min-height: 600px;
-    height: 60vh;
-    min-width: 400px;
-    width: 100vw;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    margin-top: 50px;
-    margin-bottom: 50px;
+    justify-content: flex-start;
+    padding: 20px;
+    padding-top: 20vh;
+    font-family: 'DM Sans', sans-serif;
+    min-width: 300px;
+    width: 100%;
+    height: 100%;
 }
 
 .header{
@@ -79,21 +80,26 @@ export default {
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    min-height: 100px;
+    width: 100%;
     height: 10%;
-    width: 40%;
+    min-width: 250px;
+    max-width: 500px;
+    min-height: 50px;
+    margin-bottom: 20px;
 }
 .header h1{
     color:#063970;
 }
 
 .input-group {
-    width: 40%;
-    height: 10%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    min-width: 250px;
+    max-width: 500px;
     margin-bottom: 15px;
 }
 
@@ -110,25 +116,29 @@ export default {
 .input-group label {
     margin: 0;
     font-family: 'DM Sans', sans-serif;
+    color: #063970;
     font-size: clamp(1rem, 50%, 2rem);
 }
 
 .create {
-    margin: 25px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40%;
-    height: 5%;
-    z-index: 0;
+    width: 100%;
+    height: 12%;
+    min-width: 250px;
+    max-width: 500px;
+    min-height: 100px;
 }
 
 .createbtn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40%;
-    height: 100%;
+    width: 80%;
+    height: 30%;
+    min-width: 200px;
     background-color: #063970;
     color: white;
     border-radius: 10px;
