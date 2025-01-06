@@ -1,5 +1,5 @@
 from django.db import models
-from projects.models import Project  # Adjust this import if necessary
+from projects.models import Project
 
 class AnalysisResult(models.Model):
     """

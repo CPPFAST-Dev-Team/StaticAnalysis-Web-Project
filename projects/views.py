@@ -25,12 +25,32 @@ class ProjectListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Get the queryset of projects for the authenticated user.
+
+        :return: A queryset of projects.
+        :rtype: django.db.models.query.QuerySet
+        """
         return Project.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
+        """
+        Save the new project with the authenticated user as the owner.
+
+        :param serializer: The project serializer.
+        :type serializer: ProjectSerializer
+        """
         serializer.save(owner=self.request.user)
 
     def list(self, request, *args, **kwargs):
+        """
+        List all projects for the authenticated user.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :return: A list of projects.
+        :rtype: rest_framework.response.Response
+        """
         try:
             queryset = self.get_queryset()
             logger.info(f"User {request.user.username} retrieved {queryset.count()} projects")
@@ -40,12 +60,15 @@ class ProjectListCreateView(generics.ListCreateAPIView):
             return Response({"error": "An error occurred while retrieving projects"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, *args, **kwargs):
+        """
+        Create a new project for the authenticated user.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :return: The created project details.
+        :rtype: rest_framework.response.Response
+        """
         try:
-            repo = request.data.get('repo')
-            token = request.data.get('token')
-            
-            # Add logic here to validate repo and token
-            
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
@@ -76,9 +99,25 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Get the queryset of projects for the authenticated user.
+
+        :return: A queryset of projects.
+        :rtype: django.db.models.query.QuerySet
+        """
         return Project.objects.filter(owner=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a specific project instance.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :param pk: The primary key of the project.
+        :type pk: int
+        :return: The project details.
+        :rtype: rest_framework.response.Response
+        """
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
@@ -92,6 +131,16 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"error": "An error occurred while retrieving the project"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, *args, **kwargs):
+        """
+        Update a specific project instance.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :param pk: The primary key of the project.
+        :type pk: int
+        :return: The updated project details.
+        :rtype: rest_framework.response.Response
+        """
         try:
             response = super().update(request, *args, **kwargs)
             logger.info(f"User {request.user.username} updated project: {response.data.get('name', 'Unknown')}")
@@ -101,6 +150,16 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"error": "An error occurred while updating the project"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):
+        """
+        Delete a specific project instance.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :param pk: The primary key of the project.
+        :type pk: int
+        :return: A success message.
+        :rtype: rest_framework.response.Response
+        """
         try:
             instance = self.get_object()
             project_name = instance.name
@@ -112,7 +171,7 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Error deleting project for user {request.user.username}: {str(e)}")
-            return Response({"error": "An error occurred while deleting the project"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
+            return Response({"error": "An error occurred while deleting the project"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserProjectListView(generics.ListAPIView):
     """
@@ -130,6 +189,12 @@ class UserProjectListView(generics.ListAPIView):
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
+        """
+        Get the queryset of projects for a specific user.
+
+        :return: A queryset of projects.
+        :rtype: django.db.models.query.QuerySet
+        """
         user_id = self.kwargs['user_id']
         return Project.objects.filter(users__id=user_id)
 
@@ -151,6 +216,16 @@ class ProjectUserAddView(generics.UpdateAPIView):
     serializer_class = ProjectSerializer
 
     def update(self, request, *args, **kwargs):
+        """
+        Add a user to a specific project.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :param pk: The primary key of the project.
+        :type pk: int
+        :return: A success message if the user is added, or an error message if the user is not found.
+        :rtype: rest_framework.response.Response
+        """
         project = self.get_object()
         user_id = request.data.get('user_id')
         try:
@@ -164,7 +239,7 @@ class InitiateScanView(generics.CreateAPIView):
     """
     Initiate a scan for a specific project.
 
-    This view provides a POST method to start a scan for a project.
+    This view provides a POST method to initiate a scan for a project.
 
     :param request: The HTTP request object.
     :type request: rest_framework.request.Request
@@ -177,6 +252,16 @@ class InitiateScanView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
+        """
+        Initiate a scan for a specific project.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :param project_id: The ID of the project to be scanned.
+        :type project_id: int
+        :return: A success message if the scan is initiated, or an error message if the project is not found.
+        :rtype: rest_framework.response.Response
+        """
         project_id = kwargs.get('project_id')
         branch = request.data.get('branch')
         commit = request.data.get('commit')
@@ -191,7 +276,7 @@ class InitiateScanView(generics.CreateAPIView):
         except Exception as e:
             logger.error(f"Error initiating scan for project {project_id}: {str(e)}")
             return Response({"error": "An error occurred while initiating the scan"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
 class LogoutView(generics.GenericAPIView):
     """
     Logout the user.
@@ -200,28 +285,19 @@ class LogoutView(generics.GenericAPIView):
 
     :param request: The HTTP request object.
     :type request: rest_framework.request.Request
-    :return: A success message if the user is logged out.
+    :return: A success message indicating the user has been logged out.
     :rtype: rest_framework.response.Response
     """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        """
+        Handle POST request to log out the user.
+
+        :param request: The HTTP request object.
+        :type request: rest_framework.request.Request
+        :return: A success message indicating the user has been logged out.
+        :rtype: rest_framework.response.Response
+        """
         # Add logic here to log out the user
         return Response({"message": "User logged out successfully"}, status=status.HTTP_200_OK)
-
-#class LogoutView(APIView):
-#    """
-#    API view for user logout.
-#
-#    This view handles POST requests for user logout by removing the user's token.
-#    
-#    :param request: The HTTP request object.
-#    :type request: rest_framework.request.Request
-#    :return: Response indicating successful logout.
-#    :rtype: rest_framework.response.Response
-#    """
-#    permission_classes = [IsAuthenticated] # Add this line to require authentication
-#
-#    def post(self, request):
-#        # Optionally handle token blacklisting here if needed
-#        return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)

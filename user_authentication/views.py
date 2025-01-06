@@ -10,6 +10,11 @@ class UserRegistrationView(generics.CreateAPIView):
     API view for user registration.
 
     This view handles POST requests to create a new user account.
+
+    :param request: The HTTP request object
+    :type request: rest_framework.request.Request
+    :return: Response with user data and JWT tokens on success, or error messages on failure
+    :rtype: rest_framework.response.Response
     """
     serializer_class = UserSerializer
 
@@ -39,7 +44,12 @@ class UserLoginView(APIView):
     """
     API view for user login.
 
-    This view handles POST requests for user authentication and login.
+    This view handles POST requests to authenticate a user and return JWT tokens.
+
+    :param request: The HTTP request object
+    :type request: rest_framework.request.Request
+    :return: Response with JWT tokens on success, or error messages on failure
+    :rtype: rest_framework.response.Response
     """
     def post(self, request):
         """
@@ -47,7 +57,7 @@ class UserLoginView(APIView):
 
         :param request: The HTTP request object
         :type request: rest_framework.request.Request
-        :return: Response with user data and JWT tokens on success, or error message on failure
+        :return: Response with JWT tokens on success, or error messages on failure
         :rtype: rest_framework.response.Response
         """
         serializer = UserLoginSerializer(data=request.data)
@@ -65,5 +75,25 @@ class UserLoginView(APIView):
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# We don't need a logout view for JWT as tokens are stateless (removed from client storage)
-# The client just needs to remove the token from storage to log out
+class LogoutView(generics.GenericAPIView):
+    """
+    API view for user logout.
+
+    This view handles POST requests for user logout by deleting the user's auth token.
+
+    :param request: The HTTP request object
+    :type request: rest_framework.request.Request
+    :return: Response indicating successful logout
+    :rtype: rest_framework.response.Response
+    """
+    def post(self, request):
+        """
+        Handle POST request for user logout.
+
+        :param request: The HTTP request object
+        :type request: rest_framework.request.Request
+        :return: Response indicating successful logout
+        :rtype: rest_framework.response.Response
+        """
+        request.auth.delete()
+        return Response(status=status.HTTP_200_OK)
