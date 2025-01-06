@@ -24,6 +24,7 @@ class ProjectTests(TestCase):
         self.project = Project.objects.create(
             name='Test Project',
             description='A test project description',
+            repository_url='https://example.com/repo.git',
             owner=self.user
         )
 
@@ -40,7 +41,7 @@ class ProjectTests(TestCase):
         Test creating a new project.
         """
         url = reverse('project-list-create')
-        data = {'name': 'New Project', 'description': 'New project description'}
+        data = {'name': 'New Project', 'description': 'New project description', 'repository_url': 'https://example.com/repo.git'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -58,6 +59,7 @@ class StaticAnalysisTests(TestCase):
         self.project = Project.objects.create(
             name='Test Project',
             description='A test project description',
+            repository_url='https://example.com/repo.git',
             owner=self.user
         )
 

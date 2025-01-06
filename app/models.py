@@ -1,77 +1,35 @@
 from django.db import models
 from django.contrib.auth.models import User
-from decimal import Decimal
 
 class Project(models.Model):
     """
     Represents a project in the system.
 
-    This model stores information about projects, including their name, description,
-    repository URL, owner, creation and update times, and associated users.
-
+    :param owner: The user who owns the project
+    :type owner: User
+    :param users: The users associated with the project
+    :type users: User
     :param name: The name of the project
     :type name: str
-    :param description: A detailed description of the project
+    :param description: A brief description of the project
     :type description: str
     :param repository_url: The URL of the project's repository
     :type repository_url: str
-    :param owner: The user who owns the project
-    :type owner: User
-    :param created_at: The date and time when the project was created
-    :type created_at: datetime
-    :param updated_at: The date and time when the project was last updated
-    :type updated_at: datetime
-    :param users: The users associated with this project
-    :type users: ManyToManyField
     """
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_projects_app')
+    users = models.ManyToManyField(User, related_name='projects_app')
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(default="No description provided")
     repository_url = models.URLField()
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_projects')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    users = models.ManyToManyField(User, related_name='projects')
 
     def __str__(self):
         """
         Returns a string representation of the Project.
 
-        :return: The name of the project
+        :return: A string describing the project
         :rtype: str
         """
         return self.name
-
-class AnalysisResult(models.Model):
-    """
-    Represents the result of a static code analysis for a project.
-
-    :param project: The project associated with this analysis result
-    :type project: Project
-    :param timestamp: The time when the analysis was performed
-    :type timestamp: datetime
-    :param status: The current status of the analysis
-    :type status: str
-    :param result: The detailed result of the analysis
-    :type result: JSON
-    """
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='analysis_results')
-    timestamp = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[
-        ('PENDING', 'Pending'),
-        ('IN_PROGRESS', 'In Progress'),
-        ('COMPLETED', 'Completed'),
-        ('FAILED', 'Failed')
-    ], default='PENDING')
-    result = models.JSONField(null=True, blank=True)
-
-    def __str__(self):
-        """
-        Returns a string representation of the AnalysisResult.
-
-        :return: A string describing the analysis result
-        :rtype: str
-        """
-        return f"Analysis for {self.project.name} - {self.timestamp}"
 
 class Vulnerability(models.Model):
     """
@@ -94,7 +52,7 @@ class Vulnerability(models.Model):
     :param confidence: The confidence level of the vulnerability detection
     :type confidence: Decimal
     """
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
     file_location = models.CharField(max_length=30)
     line = models.BigIntegerField()
