@@ -10,11 +10,6 @@ class UserRegistrationView(generics.CreateAPIView):
     API view for user registration.
 
     This view handles POST requests to create a new user account.
-
-    :param request: The HTTP request object
-    :type request: rest_framework.request.Request
-    :return: Response with user data and JWT tokens on success, or error messages on failure
-    :rtype: rest_framework.response.Response
     """
     serializer_class = UserSerializer
 
@@ -24,8 +19,6 @@ class UserRegistrationView(generics.CreateAPIView):
 
         :param request: The HTTP request object
         :type request: rest_framework.request.Request
-        :param args: Additional positional arguments
-        :param kwargs: Additional keyword arguments
         :return: Response with user data and JWT tokens on success, or error messages on failure
         :rtype: rest_framework.response.Response
         """
@@ -45,11 +38,6 @@ class UserLoginView(APIView):
     API view for user login.
 
     This view handles POST requests to authenticate a user and return JWT tokens.
-
-    :param request: The HTTP request object
-    :type request: rest_framework.request.Request
-    :return: Response with JWT tokens on success, or error messages on failure
-    :rtype: rest_framework.response.Response
     """
     def post(self, request):
         """
@@ -75,16 +63,11 @@ class UserLoginView(APIView):
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LogoutView(generics.GenericAPIView):
+class UserLogoutView(APIView):
     """
     API view for user logout.
 
     This view handles POST requests for user logout by deleting the user's auth token.
-
-    :param request: The HTTP request object
-    :type request: rest_framework.request.Request
-    :return: Response indicating successful logout
-    :rtype: rest_framework.response.Response
     """
     def post(self, request):
         """

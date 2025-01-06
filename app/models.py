@@ -1,38 +1,36 @@
 from django.db import models
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 class Project(models.Model):
     """
     Represents a project in the system.
 
-    :param user: The user who owns the project
-    :type user: User
+    This model stores information about projects, including their name, description,
+    repository URL, owner, creation and update times, and associated users.
+
     :param name: The name of the project
     :type name: str
-    :param github_link: The GitHub link of the project
-    :type github_link: str
-    :param icon: The icon representing the project
-    :type icon: str
-    :param num_high_issues: The number of high-priority issues
-    :type num_high_issues: int
-    :param num_med_issues: The number of medium-priority issues
-    :type num_med_issues: int
-    :param num_low_issues: The number of low-priority issues
-    :type num_low_issues: int
-    :param token: The token associated with the project
-    :type token: str
-    :param team: The team associated with the project
-    :type team: str
+    :param description: A detailed description of the project
+    :type description: str
+    :param repository_url: The URL of the project's repository
+    :type repository_url: str
+    :param owner: The user who owns the project
+    :type owner: User
+    :param created_at: The date and time when the project was created
+    :type created_at: datetime
+    :param updated_at: The date and time when the project was last updated
+    :type updated_at: datetime
+    :param users: The users associated with this project
+    :type users: ManyToManyField
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=30)
-    github_link = models.CharField(max_length=30)
-    icon = models.CharField(max_length=30)
-    num_high_issues = models.BigIntegerField()
-    num_med_issues = models.BigIntegerField()
-    num_low_issues = models.BigIntegerField()
-    token = models.CharField(max_length=30)
-    team = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    repository_url = models.URLField()
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_projects')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    users = models.ManyToManyField(User, related_name='projects')
 
     def __str__(self):
         """
@@ -42,6 +40,38 @@ class Project(models.Model):
         :rtype: str
         """
         return self.name
+
+class AnalysisResult(models.Model):
+    """
+    Represents the result of a static code analysis for a project.
+
+    :param project: The project associated with this analysis result
+    :type project: Project
+    :param timestamp: The time when the analysis was performed
+    :type timestamp: datetime
+    :param status: The current status of the analysis
+    :type status: str
+    :param result: The detailed result of the analysis
+    :type result: JSON
+    """
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='analysis_results')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed')
+    ], default='PENDING')
+    result = models.JSONField(null=True, blank=True)
+
+    def __str__(self):
+        """
+        Returns a string representation of the AnalysisResult.
+
+        :return: A string describing the analysis result
+        :rtype: str
+        """
+        return f"Analysis for {self.project.name} - {self.timestamp}"
 
 class Vulnerability(models.Model):
     """
@@ -80,64 +110,4 @@ class Vulnerability(models.Model):
         :return: A string describing the vulnerability
         :rtype: str
         """
-        return f"{self.name} in {self.project.name} - {self.severity}"
-
-class AnalysisResult(models.Model):
-    """
-    Represents the result of a code analysis for a project.
-
-    :param project: The project associated with this analysis result
-    :type project: Project
-    :param timestamp: The time when the analysis was performed
-    :type timestamp: datetime
-    :param status: The current status of the analysis
-    :type status: str
-    :param result: The detailed result of the analysis
-    :type result: JSON
-    """
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='analysis_results')
-    timestamp = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[
-        ('PENDING', 'Pending'),
-        ('IN_PROGRESS', 'In Progress'),
-        ('COMPLETED', 'Completed'),
-        ('FAILED', 'Failed')
-    ], default='PENDING')
-    result = models.JSONField(null=True, blank=True)
-
-    def __str__(self):
-        """
-        Returns a string representation of the AnalysisResult.
-
-        :return: A string describing the analysis result
-        :rtype: str
-        """
-        return f"Analysis for {self.project.name} - {self.timestamp}"
-
-# User Authentication Model
-class UserProfile(models.Model):
-    """
-    Represents additional user profile information.
-
-    :param user: The user associated with this profile
-    :type user: User
-    :param bio: A brief biography of the user
-    :type bio: str
-    :param location: The user's location
-    :type location: str
-    :param birth_date: The user's birth date
-    :type birth_date: date
-    """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(max_length=500, blank=True)
-    location = models.CharField(max_length=30, blank=True)
-    birth_date = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        """
-        Returns a string representation of the UserProfile.
-
-        :return: The username of the associated user
-        :rtype: str
-        """
-        return self.user.username
+        return f"{self.name} ({self.severity})"
