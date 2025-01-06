@@ -7,5 +7,5 @@ urlpatterns = [
     path('users/<int:user_id>/projects/', UserProjectListView.as_view(), name='user-projects'),
     path('projects/<int:pk>/users/', ProjectUserAddView.as_view(), name='project-add-user'),
     path('projects/<int:project_id>/scan/', InitiateScanView.as_view(), name='initiate-scan'),
-    path('logout/', LogoutView.as_view(), name='logout'),  # Add logout endpoint
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]
