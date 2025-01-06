@@ -23,7 +23,6 @@ class Project(models.Model):
     :param users: The users associated with this project
     :type users: ManyToManyField
     """
-
     name = models.CharField(max_length=100)
     description = models.TextField()
     repository_url = models.URLField()
