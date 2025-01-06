@@ -19,8 +19,10 @@ class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_projects_app')
     users = models.ManyToManyField(User, related_name='projects_app')
     name = models.CharField(max_length=100)
-    description = models.TextField(default="No description provided")
+    description = models.TextField()
     repository_url = models.URLField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         """
