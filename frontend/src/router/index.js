@@ -5,6 +5,7 @@ import Issues from '../views/Issues.vue'
 import New_Project from '../views/New_Project.vue'
 import Login from '../views/Login.vue'
 import New_Scan from '../views/New_Scan.vue'
+import axios from 'axios'
 
 const routes = [
     {
@@ -39,16 +40,55 @@ const router = createRouter({
     routes
 })
 
-router.beforeEach(async (to, from) => {
-    if (
-      // make sure the user is authenticated
-      !localStorage.getItem('token') &&
-      // ❗️ Avoid an infinite redirect
-      to.name !== 'Login'
-    ) {
-      // redirect the user to the login page
-      return { name: 'Login' }
+function isAuthenticated(){
+    const access = localStorage.getItem("access");
+    if(!access) return false;
+
+    const payload = JSON.parse(atob(access.split(".")[1]));
+    const expirationTime = payload.exp * 1000
+
+    return Date.now() < expirationTime
+}
+
+async function refreshToken(){
+    const refresh = localStorage.getItem("refresh");
+    if(!refresh){
+        localStorage.removeItem('access')
+        localStorage.removeItem('refresh')
+        return false;
     }
+    try {
+        const res = await axios.post("api/auth/token/refresh/", { refresh });
+        const access = res.data.access;
+        localStorage.setItem("access", access);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+        return true;
+    } catch (err) {
+        console.error({ 'Error': err });
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
+        return false;
+    }
+}
+
+router.beforeEach(async (to, from) => {
+    if (to.name === "Login") 
+    {
+      return true;
+    }
+
+    if(!isAuthenticated()){
+        const refreshed = await refreshToken();
+        console.log({'refreshed': refreshed})
+        if(refreshed){
+            return true;
+        }
+        if(!refreshed){
+            console.log("We are returning to login")
+            return {name: "Login"}
+        }
+    }
+    return true;
   })
 
 export default router

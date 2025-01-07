@@ -8,9 +8,9 @@ export default {
     Navbar,
   },
   beforeCreate(){
-    const token = localStorage.getItem('token')
-    if(token){
-      axios.defaults.headers.common['Authorization'] = "Token " + token
+    const access = localStorage.getItem('token')
+    if(access){
+      axios.defaults.headers.common['Authorization'] = "Token " + `Bearer ${access}`
     } else {
       axios.defaults.headers.common['Authorization'] = ""
     }

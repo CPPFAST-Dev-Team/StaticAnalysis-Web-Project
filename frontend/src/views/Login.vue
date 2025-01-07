@@ -55,17 +55,20 @@ export default{
                 password: this.password
             }
 
-            await axios
-                .post("api/auth/login/", formData)
-                .then(response => {
-                    const token = response.data.auth_token
+            try{
+                const response = await axios.post("api/auth/login/", formData)
 
-                    axios.defaults.headers.common["Authorization"] = "Token " + token
-                    localStorage.setItem("token", token)
-                    this.$router.push('/projects')
-                })
-                .catch(error => {
-                    if (error.response) {
+                const access = response.data.access
+                const refresh = response.data.refresh
+
+                axios.defaults.headers.common["Authorization"] = `Bearer ${access}`
+                localStorage.setItem("access", access)
+                localStorage.setItem('refresh', refresh)
+
+                this.$router.push('/projects')
+            }
+            catch (error){
+                if (error.response) {
                         console.log(error.response.data)
                         if(error.response.data.error == 'Invalid credentials'){
                             this.alertOutput = 'Invalid credentials. '
@@ -80,7 +83,7 @@ export default{
                         this.toggleAlert()
                         console.log(JSON.stringify(error))
                     }
-                })
+            }
         },
         async submitRegister(){
                 if(this.username === ''){

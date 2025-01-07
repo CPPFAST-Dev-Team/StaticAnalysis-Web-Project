@@ -9,13 +9,14 @@
 
         <div class="right">
             
-            <div class="dropdown" v-show="logged"  @mouseenter="hoverDropdown" @mouseleave="leaveDropdown">
+            <div class="dropdown">
                 <button class="dropbtn" @click="toggleDropdown">
                     <i class="fa fa-bars"></i>
                 </button>
-                <div class="dropdown-content" v-if="showDropdown">
+                <div class="dropdown-content" v-if="showDropdown && logged">
                     <router-link to="/projects">Projects</router-link>
                     <router-link to="/new-project">New Project</router-link>
+                    <span @click="logout">Logout</span>
                 </div>
             </div>
         </div>
@@ -73,7 +74,7 @@
 }
 
 .dropdown-content {
-    display: none;
+    display: block;
     position: absolute;
     background-color: #f9f9f9;
     min-width: 160px;
@@ -83,7 +84,7 @@
     right: 0;
 }
 
-.dropdown-content a {
+.dropdown-content a, .dropdown-content span {
     font-family: 'DM Sans', sans-serif;
     color: #063970;
     padding: 12px 16px;
@@ -92,12 +93,9 @@
     text-align: left;
 }
 
-.dropdown-content a:hover {
+.dropdown-content a:hover, .dropdown-content span:hover {
+    cursor: pointer;
     background-color: #ddd;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
 }
 
 .navbar text {
@@ -113,29 +111,23 @@ export default {
     data(){
         return{
             showDropdown: false,
-            logged: false,
         }
     },
-    mounted(){
-        this.logged = !!localStorage.getItem('token');
+    computed: {
+        logged(){
+            return !!localStorage.getItem('access')
+        }
     },
     methods: {
+        logout(){
+            this.showDropdown = false;
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+
+            this.$router.push({name:'Login'});
+        },
         toggleDropdown(){
-            if(window.innerWidth < 768){
-                this.showDropdown = !this.showDropdown
-            }
-        },
-        hoverDropdown(){
-            if(!(window.innerWidth < 768))
-            {
-                this.showDropdown = true
-            }
-        },
-        leaveDropdown(){
-            if(!(window.innerWidth < 768))
-            {
-                this.showDropdown = false
-            }
+            this.showDropdown = !this.showDropdown
         },
     }
 };
