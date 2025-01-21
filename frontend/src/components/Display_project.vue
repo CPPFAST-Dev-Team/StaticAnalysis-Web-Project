@@ -27,33 +27,30 @@
  </template>
  
  
- <script>
- import Issues from '../views/Issues.vue';
- export default {
-  name: "Display_project",
-  props: {
-    githubUrl: {
-      type: String,
-      required: true
-    },
-    imgSrc:{
-      type: String,
-      required: true,
-    },
-    issueRed: {
-      type: Number,
-      required: true
-    },
-    issueYellow: {
-      type: Number,
-      required: true
-    },
-    issueBlue: {
-      type: Number,
-      required: true
-    },
-  },
- };
+ <script setup>
+ // Define props
+   defineProps({
+     githubUrl: {
+       type: String,
+       required: true
+     },
+     imgSrc:{
+       type: String,
+       required: true,
+     },
+     issueRed: {
+       type: Number,
+       required: true
+     },
+     issueYellow: {
+       type: Number,
+       required: true
+     },
+     issueBlue: {
+       type: Number,
+       required: true
+     },
+   });
  </script>
  
  

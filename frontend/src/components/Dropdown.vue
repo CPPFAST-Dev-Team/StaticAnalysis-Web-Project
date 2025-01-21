@@ -23,48 +23,36 @@
     </div>
 </template>
 
-<script>
-export default {
-  props: {
-    selectFiller: {
-      type: String,
-      required: true,
-    },
-    options: {
-      type: Array,
-      required: true,
-    },
-    modelValue: {
-      default: null,
-    },
-  },
-  data() {
-    return {
-      selectedOption: null,
-      isDropdownVisible: false,
-    };
-  },
-  mounted() {
-    window.addEventListener('click', this.closeDropdown);
-  },
-  beforeDestroy() {
-    window.removeEventListener('click', this.closeDropdown);
-  },
-  methods: {
-    toggleOptionSelect(option) {
-      this.selectedOption = option;
-      this.$emit('update:modelValue', option);
-      this.isDropdownVisible = false;
-    },
-    closeDropdown(event) {
-      if (this.$refs.Dropdown && !this.$refs.Dropdown.contains(event.target)) {
-        this.isDropdownVisible = false;
-      }
-    },
-  },
-};
+<script setup>
+  import { ref, onMounted, onUnmounted } from 'vue'
+  const Dropdown = ref(null)
+  const selectedOption = ref(null)
+  const isDropdownVisible = ref(false)
+  const props = defineProps({
+    selectFiller: String,
+    options: Array,
+  })
 
+  const emit = defineEmits(['update:modelValue']) //defines what events the child can emit to the parent
 
+  function toggleOptionSelect(option) {
+    selectedOption.value = option;
+    emit('update:modelValue', option); //tell parent to update parent value from child component's selectedOption
+    isDropdownVisible.value = false;
+  }
+
+  function closeDropdown(event) {
+    if (Dropdown.value && !Dropdown.value.contains(event.target)) { //access ref attached to DOM element of Dropdown
+      isDropdownVisible.value = false;
+    }
+  }
+
+  onMounted(() => {
+    window.addEventListener('click', closeDropdown);
+  })
+  onUnmounted(() => {
+    window.removeEventListener('click', closeDropdown);
+  })
 </script>
 
 <style scoped>

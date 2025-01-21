@@ -23,6 +23,27 @@
     </div>
 </template>
 
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+const showDropdown = ref(false)
+
+const router = useRouter()
+const logged = computed(() => !!localStorage.getItem('access'))
+
+function logout(){
+    showDropdown.value = false
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+
+    router.push('/')
+}
+
+function toggleDropdown(){
+    showDropdown.value = !showDropdown.value
+}
+</script>
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
@@ -105,30 +126,3 @@
 }
 </style>
 
-<script>
-export default {
-    name: "Navbar",
-    data(){
-        return{
-            showDropdown: false,
-        }
-    },
-    computed: {
-        logged(){
-            return !!localStorage.getItem('access')
-        }
-    },
-    methods: {
-        logout(){
-            this.showDropdown = false;
-            localStorage.removeItem('access');
-            localStorage.removeItem('refresh');
-
-            this.$router.push({name:'Login'});
-        },
-        toggleDropdown(){
-            this.showDropdown = !this.showDropdown
-        },
-    }
-};
-</script>

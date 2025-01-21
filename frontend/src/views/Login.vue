@@ -2,25 +2,21 @@
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
-    <div class="input-container">
-        <div class="alert" v-if="showAlert">
+    <div class="input-container"> 
+        <div :class="notification.class" v-if="notification.show"> <!--dynamically assign class of div element and render based on show property of notification-->
             <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-            <text class="alert-text">{{alertOutput}}</text>
-        </div>
-        <div class="success" v-if="showSuccess">
-            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-            <text class="alert-text">{{alertOutput}}</text>
+            <text class="alert-text">{{notification.message}}</text>
         </div>
         <div class="icon-login">
             <i class="fa fa-user-o" aria-hidden="true"></i>
         </div>
         <div class="input-group">
-            <label for="repo">Username</label>
+            <label>Username</label>
             <input type="text" v-model="username"><br><br>
         </div>
 
         <div class="input-group">
-            <label for="token">Password</label>
+            <label>Password</label>
             <input type="password" v-model="password"><br><br>
         </div>
 
@@ -32,108 +28,92 @@
     </div>
 </template>
 
-<script>
-import axios from 'axios'
-export default{
-    data(){
-        return{
-            username: '',
-            password: '',
-            alertOutput: '',
-            showAlert: false,
-            showSuccess: false,
+<script setup>
+    import { ref, reactive } from 'vue'
+    import { useRouter } from 'vue-router'
+    import axios from 'axios'
+
+    const username = ref('')
+    const password = ref('')
+    const notification = reactive({ //state variable to handle notifications, use through toggleNotification(*message, *type of notification, alert or message)
+        show: false,
+        class: '',
+        message: '',
+    })
+
+    const router = useRouter();
+
+    async function submitLogin (){
+        if(username.value === ''){
+            toggleNotification('Please provide a username', "alert") //Check for username input
         }
-    },
-    methods: {
-        async submitLogin(){
-            axios.defaults.headers.common["Authorization"] = ""
+        else if(password.value === ''){
+            toggleNotification('Please provide a password', "alert") //Check for password input
+        }
+        else{
+            try{ //catch any errors returned from backend
+                axios.defaults.headers.common["Authorization"] = "" //remove access token from header if there is one
 
-            localStorage.removeItem("token")
+                localStorage.removeItem("access") //remove existing tokens
+                localStorage.removeItem("refresh")
 
-            const formData = {
-                username: this.username,
-                password: this.password
-            }
+                const formData = {
+                    username: username.value,
+                    password: password.value
+                }
 
-            try{
-                const response = await axios.post("api/auth/login/", formData)
+                const response = await axios.post("api/auth/login/", formData) //send post request and retrieve JWT tokens from response
 
                 const access = response.data.access
                 const refresh = response.data.refresh
 
-                axios.defaults.headers.common["Authorization"] = `Bearer ${access}`
+                axios.defaults.headers.common["Authorization"] = `Bearer ${access}` //add access token to axios header
                 localStorage.setItem("access", access)
                 localStorage.setItem('refresh', refresh)
 
-                this.$router.push('/projects')
+                router.push('/projects')
             }
             catch (error){
-                if (error.response) {
-                        console.log(error.response.data)
-                        if(error.response.data.error == 'Invalid credentials'){
-                            this.alertOutput = 'Invalid credentials. '
-                            this.toggleAlert()
-                        }
-                        else{
-                            this.alertOutput = 'Enter valid username and password. '
-                            this.toggleAlert()
-                        }
-                    } else {
-                        this.alertOutput = 'Something went wrong. Please try again. '
-                        this.toggleAlert()
-                        console.log(JSON.stringify(error))
-                    }
+                error?.response?.data?.error ? toggleNotification('Invalid credentials', 'alert'): toggleNotification('Something went wrong. Please try again', 'alert')
             }
-        },
-        async submitRegister(){
-                if(this.username === ''){
-                    this.alertOutput = 'Enter a username. '
-                    this.toggleAlert()
-                }
-                else if(this.password === ''){
-                    this.alertOutput = 'Enter a password. '
-                    this.toggleAlert()
+        }
+    }
+    async function submitRegister(){
+        if(username.value === ''){
+            toggleNotification('Please provide a username', "alert") //Check for username input
+        }
+        else if(password.value === ''){
+            toggleNotification('Please provide a password', "alert") //Check for password input
+        }
+        else{
+            const formData = {
+                username: username.value,
+                password: password.value
+            }
+            
+            try{
+                const response = await axios.post('api/auth/register/', formData) //send post request to create user in backend
+                let message = "Account created, please login with same credentials."
+                toggleNotification(message, "success")
+            } 
+            catch(err){
+                if(err?.response?.data?.username){
+                    toggleNotification('Username is already taken. Please provide a different one', 'alert')
                 }
                 else{
-                    const formData = {
-                        username: this.username,
-                        password: this.password
-                    }
-
-                    axios
-                        .post("api/auth/register/", formData)
-                        .then(response => {
-                            this.alertOutput = "Account created, please login with same credentials."
-                            this.toggleSuccess()
-                        })
-                        .catch(error =>{
-                            if(error.response){
-                                if(error.response.data.username){
-                                    this.alertOutput = error.response.data.username[0];
-                                    this.toggleAlert();
-                                    console.log(JSON.stringify(error.response.data))
-                                }
-                            }
-                            this.alertOutput = 'Something went wrong. Please try again. '
-                            this.toggleAlert()
-                            console.log(JSON.stringify(error))
-                        })
+                    toggleNotification('Something went wrong. Please try again', 'alert')
                 }
-        },
-        toggleAlert(){
-            this.showAlert = true;
-            setTimeout(() => {
-                this.showAlert = false;
-            }, 3000);
-        },
-        toggleSuccess(){
-            this.showSuccess = true;
-            setTimeout(() => {
-                this.showSuccess = false;
-            }, 3000);
-        },
+            }
+        }
     }
-}
+
+    function toggleNotification(message, className){ //function to toggle a notification for three seconds
+        notification.show = true
+        notification.class = className
+        notification.message = message
+
+        setTimeout(() => (notification.show = false), 3000)
+    }
 </script>
 
 <style scoped>
@@ -222,16 +202,18 @@ export default{
         border-radius: 10px;
         cursor: pointer;
     }
-    .alert{
+    .alert, .success{
         display: flex;
         align-items: center;
-        height: 40px;
-        width: 50%;
+        height: fit-content;
+        box-sizing: border-box;
+        padding: 0px 10px 0px 10px;
+        width: fit-content;
+        max-width: 300px;
         background-color: #FFCCCB;
         border: 1px solid red;
     }
     .alert i, .success i{
-        margin-left: 10px;
         margin-right: 10px;
     }
     .alert text, .success text{
@@ -239,10 +221,6 @@ export default{
         font-size: 20px;
     }
     .success{
-        display: flex;
-        align-items: center;
-        height: 40px;
-        width: 50%;
         background-color: #0fb36f;
         border: 1px solid green;
     }

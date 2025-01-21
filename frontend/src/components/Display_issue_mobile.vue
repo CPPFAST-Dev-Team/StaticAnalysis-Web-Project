@@ -28,33 +28,32 @@
    </template>
    
    
-<script>
-export default {
-  name: "Display_issue_mobile",
-  props:{
-    fileName:{
-      type: String,
-      required: true,
-    },
-    issueName:{
-      type: String,
-      required: true,
-    },
-    line:{
-      type: Number,
-      required: true,
-    },
-    errorText:{
-      type: String,
-      required: true,
-    },
-    confidence:{
-      type: Number,
-      required: true,
-    },
-  }
-}
-</script>
+   <script setup>
+   // Define props
+   defineProps({
+     fileName: {
+       type: String,
+       required: true,
+     },
+     issueName: {
+       type: String,
+       required: true,
+     },
+     line: {
+       type: Number,
+       required: true,
+     },
+     errorText: {
+       type: String,
+       required: true,
+     },
+     confidence: {
+       type: Number,
+       required: true,
+     },
+   });
+   </script>
+   
    
    
 <style scoped>

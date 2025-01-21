@@ -1,4 +1,4 @@
-export const issues = [
+export const issuesData = [
     {
         fileName: "File.java",
         issueName: "CWE-123456",

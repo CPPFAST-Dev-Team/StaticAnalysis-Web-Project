@@ -1,8 +1,8 @@
 <template>
     <div class="container">
         <!-- normal view -->
-        <div class="header" v-if="!isMobile">
-            <h1>{{ projectName }}</h1>
+        <div class="header">
+            <h1>Placeholder.com</h1>
 
             <!-- Filter button -->
             <div>
@@ -32,16 +32,14 @@
             </div>
             <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
         </div>
-        <div class="issue-wrapper" v-for="issue in issues" v-if="!isMobile">
-            <Issue v-bind="issue"/>
+        <div class="issue-wrapper" v-for="issue in issues">
+            <component :is="issueComponent" v-bind="issue"/> <!-- dynamically assign issue component -->
         </div>
 
-        <!-- mobile view -->
-        <div class="header-mobile" v-if="isMobile">
+        <!-- <div class="header-mobile" v-if="isMobile">
             <h2>Placholder.com</h2>
             <div class="btn-group">
 
-                <!-- filter button -->
                 <div class="filter">
                     <button class="btn-filter" @click="showFiltersMobile=!showFiltersMobile">
                         <span class="left">Filter</span>
@@ -69,54 +67,35 @@
         </div>
         <div class="issue-wrapper" v-for="issue in issues" v-if="isMobile">
             <Display_issue_mobile v-bind="issue"/>
-        </div>
+        </div> -->
     </div>
 </template>
 
-<script>
-import Issue from '../components/Display_issue.vue'
-import Display_issue_mobile from '@/components/Display_issue_mobile.vue';
-import { issues } from "../issuesData.js"
-    export default{
-        data(){
-            return {
-                issues: [],
-                projectName: "",
-                showFilters: false,
-                showFiltersMobile: false,
-                isMobile: false,
-                // parameters: 
-                // fileName
-                // issueName
-                // line
-                // errorText
-                // confidence
-            }
-        },
-        mounted(){
-            this.checkIsMobile();
-            window.addEventListener('resize', this.checkIsMobile);
-        },
-        beforeUnmount() {
-            window.removeEventListener('resize', this.checkIsMobile);
-        },
-        created(){
-            this.getIssues()
-        },
-        //backend api call here to get issues
-        methods: {
-            async getIssues(){
-                this.issues = issues;
-                this.projectName = "Placeholder.com";
-            },
-            checkIsMobile(){
-                this.isMobile = window.innerWidth < 768;
-            },
-        },
-        components: {
-            Issue,
-            Display_issue_mobile
-        }
+<script setup>
+    import Issue from '../components/Display_issue.vue'
+    import Display_issue_mobile from '@/components/Display_issue_mobile.vue';
+    import { issuesData } from "../issuesData.js"
+
+    import { ref, computed, onMounted, onUnmounted } from "vue"
+
+    const issues = ref([])
+    const showFilters = ref(false)
+    const isMobile = ref(false)
+    const issueComponent = computed(() => isMobile.value ? Display_issue_mobile : Issue) //dynamically compute component based on isMobile, will recompute after each state change of isMobile
+
+    onMounted(() => {
+        issues.value = getIssues()
+        window.addEventListener('resize', updateIsMobile) //add event listener to check if width is mobile
+    })
+    onUnmounted(() => {
+        window.removeEventListener('resize', updateIsMobile) //remove event listener to check if width is mobile
+    })
+
+    function getIssues(){
+        return issuesData //fetch from issues API, dummy data for now from issuesData.js
+    }
+    function updateIsMobile(){
+        isMobile.value = window.innerWidth < 768
     }
 </script>
 

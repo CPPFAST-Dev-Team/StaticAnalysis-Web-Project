@@ -1,4 +1,4 @@
-export const projects = [
+export const projectData = [
     {
         githubUrl: "Github.com/example",
         imgSrc: "https://cdn-icons-png.flaticon.com/512/25/25231.png",

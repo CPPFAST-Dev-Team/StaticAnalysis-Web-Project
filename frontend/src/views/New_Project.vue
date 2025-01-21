@@ -9,12 +9,12 @@
 
         <form class="input-group">
             <label for="repo">Repo</label>
-            <input type="text" id="repo" v-model="repo">
+            <input type="text" id="repo" v-model="repoInput">
         </form>
 
         <form class="input-group">
             <label for="token">Token</label>
-            <input type="text" id="token" v-model="token">
+            <input type="text" id="token" v-model="tokenInput">
         </form>
 
         <form class="input-group">
@@ -22,8 +22,8 @@
             <Dropdown
                 id="team"
                 selectFiller="Select Team"
-                :options="options"
-                v-model="parentSelectedOption"
+                :options="teams"
+                v-model="selectedTeam"
             />
         </form>
 
@@ -37,26 +37,24 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import Dropdown from "../components/Dropdown.vue";
 
-export default {
-    data(){
-        return{
-            repo: "",
-            token: "",
-            options: [],
-            parentSelectedOption: null,
-        };
-    },
-    created(){
-        //backend api get teams from User
-        this.options=["Team1","Coders","Hackers"];
-    },
-    components: {
-        Dropdown
-    }
+import { ref, onMounted } from 'vue'
+
+const repoInput = ref('')
+const tokenInput = ref('')
+const teams = ref([])
+const selectedTeam = ref(null)
+
+onMounted(() => {
+    teams.value = getTeams()
+})
+
+function getTeams(){
+    return ['Team1', 'Hackers', 'Coders'] //fetch teams here
 }
+
 </script>
 
 <style scoped>

@@ -12,14 +12,14 @@
             <Dropdown
                 id="branch"
                 selectFiller="Select branch"
-                :options="options"
-                v-model="parentSelectedOption"
+                :options="branches"
+                v-model="selectedBranch"
             />
         </form>
 
         <form class="input-group">
             <label for="commit">Commit</label>
-            <input type="text" id="commit" v-model="commit"><br><br>
+            <input type="text" id="commit" v-model="commitInput">
         </form>
 
         <div class="create">
@@ -31,24 +31,21 @@
     </div>
 </template>
 
-<script>
-import Dropdown from "../components/Dropdown.vue";
+<script setup>
+import Dropdown from '../components/Dropdown.vue'
+import { ref, onMounted} from 'vue'
 
-export default {
-    data(){
-        return{
-            options: [],
-            parentSelectedOption: null,
-            commit: "",
-        };
-    },
-    created(){
-        //get request to backend api for project branches
-        this.options = ["Branch1", "Frontend Branch", "Another Branch"];
-    },
-    components: {
-        Dropdown
-    }
+const commitInput = ref('')
+const branches = ref([])
+const selectedBranch = ref(null)
+
+
+onMounted(() => {
+    branches.value = getBranches()
+})
+
+function getBranches(){
+    return ['Branch', 'Frontend Branch', 'BackendBranch'] //fetch branches here
 }
 </script>
 

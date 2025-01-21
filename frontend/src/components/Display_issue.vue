@@ -24,32 +24,30 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Display_issue",
-  props:{
-    fileName:{
+<script setup>
+  // Define props
+  defineProps({
+    fileName: {
       type: String,
       required: true,
     },
-    issueName:{
+    issueName: {
       type: String,
       required: true,
     },
-    line:{
+    line: {
       type: Number,
       required: true,
     },
-    errorText:{
+    errorText: {
       type: String,
       required: true,
     },
-    confidence:{
+    confidence: {
       type: Number,
       required: true,
     },
-  }
-}
+  });
 </script>
 
  <style scoped>
