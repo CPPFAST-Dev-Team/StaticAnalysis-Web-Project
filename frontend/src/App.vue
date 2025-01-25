@@ -20,9 +20,7 @@ export default {
 
 <template>
   <div class="wrapper">
-    <div class="nav">
-      <Navbar/>
-    </div>
+    <Navbar/>
     <div class="main">
       <router-view/>
     </div>
@@ -36,21 +34,13 @@ export default {
   align-items: flex-start;
   flex-direction: column;
 }
-.nav{
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  width: 100vw;
-  height: 5vh;
-}
 .main{
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
   width: 100vw;
-  height: 95vh;
+  height: calc(100vh - 50px);
 }
 
 </style>

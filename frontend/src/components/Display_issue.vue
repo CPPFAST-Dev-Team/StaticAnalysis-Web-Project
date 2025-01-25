@@ -58,15 +58,10 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  width: 90%;
-  height: 20%;
-  min-width: 800px;
-  min-height: 200px;
-  max-width: 1200px;
-  max-height: 300px;
+  height: 200px;
+  width: 100%;
   border: 1px solid #063970;
   padding: 10px;
-  margin: 10px;
   border-radius: 50px;
   font-family: 'DM Sans', sans-serif;
 }

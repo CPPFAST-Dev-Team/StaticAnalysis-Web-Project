@@ -59,19 +59,18 @@
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 .box {
-display: flex;
-flex-direction: column;
-justify-content: flex-start;
-align-items: flex-start;
-overflow: hidden;
-width: 300px;
-height: 300px;
-border: 1px solid #063970;
-padding: 10px;
-margin: 10px;
-border-radius: 20px;
-font-family: 'DM Sans', sans-serif;
-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 200px;
+  border: 1px solid #063970;
+  padding: 10px;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
 }  
 .header{
 display: flex;
@@ -146,12 +145,12 @@ display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
-height: 100%;
+min-height: 100%;
 width: 30%;
 padding: 5px;
 }
 .btn-column button, .btn-columns a{
-height: 20%;
+height: fit-content;
 width: 100%;
 border-radius: 5px;
 margin-bottom: 10px;

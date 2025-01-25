@@ -14,7 +14,7 @@ const routes = [
         component: Login,
     },
     {
-        path: '/projects',
+        path: '/projects/',
         name: 'Projects',
         component: Projects
     },
@@ -24,12 +24,12 @@ const routes = [
         component: Issues,
     },
     {
-        path:'/new-project',
+        path:'/new-project/',
         name:'New_Project',
         component: New_Project
     },
     {
-        path:'/new-scan',
+        path:'/new-scan/',
         name:'New_Scan',
         component: New_Scan
     },

@@ -51,8 +51,7 @@ function toggleDropdown(){
     display: flex;
     flex-direction: row;
     width: 100vw;
-    min-height: 50px;
-    height: 100%;
+    height: 50px;
     background-color: white;
     border-top: 2px solid #063970;
     border-bottom: 2px solid #063970;

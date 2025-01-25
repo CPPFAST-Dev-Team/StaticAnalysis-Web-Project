@@ -1,11 +1,13 @@
 <template>
     <div class="container">
-        <div class="header">
-            <h1>Projects</h1>
-            <router-link to="/new-project" class="btn-create">Create New</router-link>
-        </div>
-        <div class="project-wrapper" v-for="project in projects" v-if="true">
-            <component :is="projectComponent" v-bind="project"/> <!-- dynamically assign component based on isMobile -->
+        <div>
+            <div class="header">
+                <h1>Projects</h1>
+                <router-link to="/new-project" class="btn-create">Create New</router-link>
+            </div>
+            <div class="project-wrapper" v-for="project in projects" v-if="true">
+                <component :is="projectComponent" v-bind="project"/> <!-- dynamically assign component based on isMobile -->
+            </div>
         </div>
     </div>
     
@@ -43,27 +45,21 @@
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
     .container{
-        position: relative;
-        height: 100%;
-        width: 100%;
-        max-width: 1200px;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 1200px;
         padding: 25px;
     }
     .project-wrapper{
-        display: flex;
-        justify-content: center;
-        width: 100%;
+        margin-bottom: 20px;
     }
     .header{
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        width: 90%;
         height: 10%;
     }
     @media(max-width: 768px){
