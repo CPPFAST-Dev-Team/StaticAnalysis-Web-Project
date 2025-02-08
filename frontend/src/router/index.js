@@ -40,7 +40,7 @@ const router = createRouter({
     routes
 })
 
-function isAuthenticated(){
+export function isAuthenticated(){
     const access = localStorage.getItem("access");
     if(!access) return false;
 
@@ -50,7 +50,7 @@ function isAuthenticated(){
     return Date.now() < expirationTime
 }
 
-async function refreshToken(){
+export async function refreshToken(){
     const refresh = localStorage.getItem("refresh");
     if(!refresh){
         localStorage.removeItem('access')
@@ -61,7 +61,7 @@ async function refreshToken(){
         const res = await axios.post("api/auth/token/refresh/", { refresh });
         const access = res.data.access;
         localStorage.setItem("access", access);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+        axios.defaults.headers.common["Authorization"] = `Bearer ${access}`
         return true;
     } catch (err) {
         console.error({ 'Error': err });
