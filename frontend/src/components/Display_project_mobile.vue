@@ -2,47 +2,63 @@
     <div class="box">
         <div class="header">
             <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png">
-            <h2>{{githubUrl}}</h2>
+            <a :href="repository_url">
+              <h2>{{ name }}</h2>
+            </a>
         </div>
 
         <div class="issues-wrapper">
             <h2>Issues</h2>
             <div class="btn-group">
-                <router-link to="/issues" class="btn-red">{{ issueRed }}</router-link>
-                <router-link to="/issues" class="btn-yellow">{{ issueYellow }}</router-link>
+                <button class="btn-red">{{ high_vulnerabilities }}</button>
+                <button class="btn-yellow">{{ medium_vulnerabilities }}</button>
             </div>
             <div class="btn-group">
-                <router-link to="/issues" class="btn-blue">{{ issueBlue }}</router-link>
-                <router-link to="/issues" class="btn-view">View All</router-link>
+                <button class="btn-blue">{{ low_vulnerabilities }}</button>
+                <button class="btn-view" @click="navigateToIssues">View All</button>
             </div>
         </div>
     </div>
    </template>
    
 <script setup>
-// Define props
-  defineProps({
-    githubUrl: {
+  import { useRouter } from 'vue-router';
+  const router = useRouter()
+  // Define props
+  const props = defineProps({
+    id:{
+      type: Number,
+      required: true
+    },
+    name:{
       type: String,
       required: true
     },
-    imgSrc:{
-      type: String,
-      required: true,
-    },
-    issueRed: {
-      type: Number,
-      required: true
-    },
-    issueYellow: {
-      type: Number,
-      required: true
-    },
-    issueBlue: {
-      type: Number,
-      required: true
-    },
-  });
+     repository_url: {
+       type: String,
+       required: true
+     },
+     imgSrc:{
+       type: String,
+       required: true,
+     },
+     high_vulnerabilities: {
+       type: Number,
+       required: true
+     },
+     medium_vulnerabilities: {
+       type: Number,
+       required: true
+     },
+     low_vulnerabilities: {
+       type: Number,
+       required: true
+     },
+   });
+
+  function navigateToIssues(){
+    router.push({name: "Issues", params: {projectId: props.id}})
+  }
 </script>
    
    

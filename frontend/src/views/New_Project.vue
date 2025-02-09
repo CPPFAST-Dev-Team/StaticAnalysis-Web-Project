@@ -6,32 +6,26 @@
         <div class="header">
             <h1>New Project</h1>
         </div>
-
-        <form class="input-group">
-            <label for="repo">Repo</label>
+        
+        <div class="input-group">
+            <label for="name">Project Name</label>
+            <input type="text" id="name" v-model="nameInput">
+        </div>
+        <div class="input-group">
+            <label for="repo">Repository Url</label>
             <input type="text" id="repo" v-model="repoInput">
-        </form>
-
-        <form class="input-group">
-            <label for="token">Token</label>
-            <input type="text" id="token" v-model="tokenInput">
-        </form>
-
-        <form class="input-group">
-            <label for="team">Team</label>
-            <Dropdown
-                id="team"
-                selectFiller="Select Team"
-                :options="teams"
-                v-model="selectedTeam"
-            />
-        </form>
+        </div>
+        <div class="input-group">
+            <label for="description">Description</label>
+            <textarea type="text" id="description" v-model="descriptionInput">
+            </textarea>
+        </div>
 
 
         <div class="create">
-            <router-link to="/projects" class="createbtn">
+            <button class="createbtn" @click="createProject">
                 <span>Create</span>
-            </router-link>
+            </button>
         </div>
         
     </div>
@@ -39,20 +33,55 @@
 
 <script setup>
 import Dropdown from "../components/Dropdown.vue";
+import api from "../api"
 
-import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import { ref, inject } from 'vue'
+import { useRouter } from 'vue-router'
 
+const nameInput = ref('')
 const repoInput = ref('')
-const tokenInput = ref('')
-const teams = ref([])
-const selectedTeam = ref(null)
+const descriptionInput = ref('')
 
-onMounted(() => {
-    teams.value = getTeams()
-})
+const router = useRouter();
+const toggleNotification = inject('toggleNotification')
 
-function getTeams(){
-    return ['Team1', 'Hackers', 'Coders'] //fetch teams here
+async function createProject(){
+    if(nameInput.value === ''){
+        toggleNotification('Please provid a project name', 'alert')
+    }
+    else if(!isValidURL(repoInput.value)){
+        toggleNotification('Please provid a valid url', 'alert')
+    }
+    else if(descriptionInput.value === ''){
+        toggleNotification('Please provide a project description', 'alert')
+    }
+    else{
+        try{ //catch any errors returned from backend
+
+            const formData = {
+                name: nameInput.value,
+                repository_url: repoInput.value,
+                description: descriptionInput.value,
+            }
+
+            const response = await api.post("api/projects/", formData)
+            toggleNotification(`Project ${nameInput.value} successfully created`, 'success')
+            router.push('/projects')
+        }
+        catch (error){
+            console.log(error)
+        }
+    }
+}
+
+function isValidURL(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 </script>
@@ -64,11 +93,10 @@ function getTeams(){
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 20px;
-    padding-top: 20vh;
-    font-family: 'DM Sans', sans-serif;
+    justify-content: center;
     min-width: 300px;
+    padding: 20px;
+    font-family: 'DM Sans', sans-serif;
     width: 100%;
     height: 100%;
 }
@@ -80,7 +108,6 @@ function getTeams(){
     justify-content: flex-start;
     width: 100%;
     height: 10%;
-    min-width: 250px;
     max-width: 500px;
     min-height: 50px;
     margin-bottom: 20px;
@@ -95,20 +122,30 @@ function getTeams(){
     align-items: flex-start;
     justify-content: center;
     width: 100%;
-    height: 50px;
-    min-width: 250px;
     max-width: 500px;
     margin-bottom: 15px;
 }
 
 .input-group input[type="text"] {
-    height: 100%;
+    height: 30px;
     width: 100%;
-    min-height: 30px;
     border: 1px solid #063970;
     border-radius: 5px;
     color: #063970;
     margin: 0;
+}
+.input-group textarea {
+    height: 100px;
+    width: 100%;
+    padding: 5px;
+    resize: none;
+    overflow-y: auto;
+    border: 1px solid #063970;
+    border-radius: 5px;
+    color: #063970;
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
 }
 
 .input-group label {
@@ -125,7 +162,6 @@ function getTeams(){
     justify-content: center;
     width: 100%;
     height: 12%;
-    min-width: 250px;
     max-width: 500px;
     min-height: 100px;
 }

@@ -2,7 +2,7 @@
   <div class="box">
     <div class="left">
       <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png">
-      <a href="https://www.github.com"><h2>{{ githubUrl }}</h2></a>
+      <a :href="repository_url"><h2>{{ name }}</h2></a>
     </div>
  
  
@@ -10,27 +10,37 @@
       <div class="innerBox">
         <h3>Issues: </h3>
         <div class="btn-group">
-          <router-link to="/issues" class="btn-red"><text>{{ issueRed }}</text></router-link>
-          <router-link to="/issues" class="btn-yellow"><text>{{ issueYellow }}</text></router-link>
-          <router-link to="/issues" class="btn-blue"><text>{{ issueBlue }}</text></router-link>
+          <button class="btn-red"><text>{{ high_vulnerabilities }}</text></button>
+          <button class="btn-yellow"><text>{{ medium_vulnerabilities }}</text></button>
+          <button class="btn-blue"><text>{{ low_vulnerabilities }}</text></button>
         </div>
       </div>
     </div>
  
  
     <div class="right">
-      <router-link to="/issues" class="btn-view">
+      <button class="btn-view" @click="navigateToIssues">
         <text>Open</text>
-      </router-link>
+      </button>
     </div>
   </div>
  </template>
  
  
  <script setup>
- // Define props
-   defineProps({
-     githubUrl: {
+  import { useRouter } from 'vue-router';
+  const router = useRouter()
+  // Define props
+   const props = defineProps({
+    id:{
+      type: Number,
+      required: true
+    },
+    name:{
+      type: String,
+      required: true
+    },
+     repository_url: {
        type: String,
        required: true
      },
@@ -38,19 +48,23 @@
        type: String,
        required: true,
      },
-     issueRed: {
+     high_vulnerabilities: {
        type: Number,
        required: true
      },
-     issueYellow: {
+     medium_vulnerabilities: {
        type: Number,
        required: true
      },
-     issueBlue: {
+     low_vulnerabilities: {
        type: Number,
        required: true
      },
    });
+
+   function navigateToIssues(){
+      router.push({name: "Issues", params: {projectId: props.id} })
+   }
  </script>
  
  
@@ -212,9 +226,14 @@
  
  
  h2 {
-  font-size: clamp(1rem, 5%, 3rem);
+  font-size: 1rem;
   margin: 10px;
   word-break: break-word;
+ }
+ @media(max-width: 768px){
+  h2{
+    font-size: 0.5rem;
+  }
  }
 
 

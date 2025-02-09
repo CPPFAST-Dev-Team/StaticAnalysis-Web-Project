@@ -3,10 +3,6 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <div class="input-container"> 
-        <div :class="notification.class" v-if="notification.show"> <!--dynamically assign class of div element and render based on show property of notification-->
-            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-            <text class="alert-text">{{notification.message}}</text>
-        </div>
         <div class="icon-login">
             <i class="fa fa-user-o" aria-hidden="true"></i>
         </div>
@@ -29,17 +25,13 @@
 </template>
 
 <script setup>
-    import { ref, reactive } from 'vue'
+    import { ref, reactive, inject } from 'vue'
     import { useRouter } from 'vue-router'
     import axios from 'axios'
 
     const username = ref('')
     const password = ref('')
-    const notification = reactive({ //state variable to handle notifications, use through toggleNotification(*message, *type of notification, alert or message)
-        show: false,
-        class: '',
-        message: '',
-    })
+    const toggleNotification = inject('toggleNotification')
 
     const router = useRouter();
 
@@ -74,6 +66,7 @@
                 router.push('/projects')
             }
             catch (error){
+                console.log(error)
                 error?.response?.data?.error ? toggleNotification('Invalid credentials', 'alert'): toggleNotification('Something went wrong. Please try again', 'alert')
             }
         }
@@ -105,14 +98,6 @@
                 }
             }
         }
-    }
-
-    function toggleNotification(message, className){ //function to toggle a notification for three seconds
-        notification.show = true
-        notification.class = className
-        notification.message = message
-
-        setTimeout(() => (notification.show = false), 3000)
     }
 </script>
 
@@ -201,28 +186,6 @@
         border: 1px solid #063970;
         border-radius: 10px;
         cursor: pointer;
-    }
-    .alert, .success{
-        display: flex;
-        align-items: center;
-        height: fit-content;
-        box-sizing: border-box;
-        padding: 0px 10px 0px 10px;
-        width: fit-content;
-        max-width: 300px;
-        background-color: #FFCCCB;
-        border: 1px solid red;
-    }
-    .alert i, .success i{
-        margin-right: 10px;
-    }
-    .alert text, .success text{
-        color: darkslategrey;
-        font-size: 20px;
-    }
-    .success{
-        background-color: #0fb36f;
-        border: 1px solid green;
     }
     text{
         text-decoration: none;

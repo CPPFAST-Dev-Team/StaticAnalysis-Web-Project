@@ -46,6 +46,8 @@
 <script setup>
     import { ref, onMounted, onUnmounted } from 'vue'
 
+    const emit = defineEmits(['update:modelValue']) //defines what events the child can emit to the parent
+
     const FilterButton = ref(null)
     const FilterOptions = ref(null)
     const showFilter = ref(false)
@@ -67,6 +69,7 @@
             selectedOptions.value.push(option)
         }
     }
+
     function closeFilterOptions(event){
         //clicking FilterButton alerts event listener, so we check that the event does not originate from FilterButton
         if(
@@ -80,7 +83,7 @@
     }
     function handleFilterSubmit(){
         showFilter.value = false
-        
+        emit('update:modelValue', selectedOptions.value);
         //logic here to filter...
         console.log(selectedOptions.value)
     }

@@ -1,14 +1,24 @@
 <template>
-    <div class="container">
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <div class="container" v-if="projects.length>0">
         <div>
             <div class="header">
                 <h1>Projects</h1>
                 <router-link to="/new-project" class="btn-create">Create New</router-link>
             </div>
-            <div class="project-wrapper" v-for="project in projects" v-if="true">
+            <div class="project-wrapper" v-for="project in projects">
                 <component :is="projectComponent" v-bind="project"/> <!-- dynamically assign component based on isMobile -->
             </div>
         </div>
+    </div>
+    <div class="empty-container" v-else>
+        <text class="empty">No Projects Yet</text>
+        <br/>
+        <FontAwesomeIcon size="5x" color="#063970" icon="fa-solid fa-face-sad-tear" />
+        <br/>
+        <router-link to="/new-project" class="btn-start-project">Create First Project</router-link>
     </div>
     
 </template>
@@ -16,9 +26,17 @@
 <script setup>
     import Display_project from '../components/Display_project.vue'
     import Display_project_mobile from '@/components/Display_project_mobile.vue';
-    import { projectData } from '../projectsData.js'
+    import api from '../api'
 
     import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+    import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+    import { fas } from '@fortawesome/free-solid-svg-icons'
+    import { library } from '@fortawesome/fontawesome-svg-core'
+
+    // Add icons to the library
+    library.add(fas)
+
 
     const projects = ref([])
     const isMobile = ref(window.innerWidth < 768)
@@ -36,8 +54,15 @@
         isMobile.value = window.innerWidth < 768;
     }
 
-    function getProjects(){
-        return projectData; //fetch projects API, dummy data from projectsData for now
+    async function getProjects(){
+        const response = await api.get("api/projects/")
+        projects.value = response.data.map(project => ({
+            ...project,
+            high_vulnerabilities: 123,
+            medium_vulnerabilities: 456,
+            low_vulnerabilities: 789,
+            imgSrc: ""
+        }))
     }
 
 </script>
@@ -53,7 +78,7 @@
         padding: 25px;
     }
     .project-wrapper{
-        margin-bottom: 20px;
+        margin: 20px 0px 20px 0px;
     }
     .header{
         display: flex;
@@ -62,7 +87,7 @@
         justify-content: flex-start;
         height: 10%;
     }
-    @media(max-width: 768px){
+    @media(max-width: 767px){
         .header{
             justify-content: center;
         }
@@ -93,6 +118,36 @@
     }
     .btn-create:hover{
         opacity: 0.8;
+    }
+
+    .empty-container{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: fit-content;
+        height: 100%;
+        max-width: 1200px;
+        padding: 25px;
+    }
+    .empty{
+        text-align: "center";
+        color: #063970;
+        font-size: 2rem;
+        font-family: 'DM Sans', sans-serif;
+    }
+    .btn-start-project{
+        height: "fit-content";
+        max-width: "500px";
+        padding: 10px 10px 10px 10px;
+        border-radius: 5px;
+        background-color:#063970;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    .btn-start-project:hover{
+        opacity: 0.5;
     }
 
     .pagination-wrapper{

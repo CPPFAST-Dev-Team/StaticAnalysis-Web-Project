@@ -67,7 +67,7 @@
 .options-wrapper{
     position: absolute;
     top: 100%;
-    z-index: 1000;
+    z-index: 10;
     cursor: pointer;
     background-color: white;
     height: 100%;

@@ -1,10 +1,9 @@
 <template>
     <div class="container">
-        <!-- normal view -->
         <div class="header">
-            <h1 class="word-wrap">Placeholder.com</h1>
+            <h1 class="word-wrap">{{ project.name }}</h1>
             <div class="btn-group">
-                <FilterButton />
+                <FilterButton v-model="selectedFilters"/>
                 <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
             </div>
         </div>
@@ -18,24 +17,38 @@
     import Issue from '../components/Display_issue.vue'
     import Display_issue_mobile from '../components/Display_issue_mobile.vue';
     import FilterButton from '../components/FilterButton.vue'
+    import api from '../api';
     import { issuesData } from "../issuesData.js"
 
     import { ref, computed, onMounted, onUnmounted } from "vue"
+    import { useRoute } from 'vue-router';
 
+    const route = useRoute()
+    
+    const projectId = route.params.projectId
+    const project = ref({})
     const issues = ref([])
-    const showFilters = ref(false)
+    const selectedFilters = ref([]) //selectedFilters emitted from child component FilterButton
     const isMobile = ref(window.innerWidth < 768)
     const issueComponent = computed(() => isMobile.value ? Display_issue_mobile : Issue) //dynamically compute component based on isMobile, will recompute after each state change of isMobile
 
-    onMounted(() => {
-        issues.value = getIssues()
+    onMounted(async () => {
+        issues.value = await getIssues()
         window.addEventListener('resize', updateIsMobile) //add event listener to check if width is mobile
     })
     onUnmounted(() => {
         window.removeEventListener('resize', updateIsMobile) //remove event listener to check if width is mobile
     })
 
-    function getIssues(){
+    async function getIssues(){
+        try{
+            const response = await api.get(`api/projects/${projectId}/`)
+            project.value = response.data
+            console.log(response.data)
+        }
+        catch(err){
+            console.log(err)
+        }
         return issuesData //fetch from issues API, dummy data for now from issuesData.js
     }
     function updateIsMobile(){
