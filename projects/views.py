@@ -1,13 +1,28 @@
+"""
+Projects views module.
+
+This module contains API views for managing projects,
+initiating code scans, listing vulnerabilities, and handling user logout.
+"""
+
+import os
+import tempfile
+import logging
+
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from .models import Project
-from .serializers import ProjectSerializer
-import logging
-from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+
+from .models import Project, Vulnerability
+from .serializers import ProjectSerializer
+from static_analysis.serializers import AnalysisResultSerializer
 
 logger = logging.getLogger(__name__)
+
 
 class ProjectListCreateView(generics.ListCreateAPIView):
     """
@@ -15,11 +30,9 @@ class ProjectListCreateView(generics.ListCreateAPIView):
 
     This view provides GET and POST methods for projects.
 
-    :param request: The HTTP request object.
-    :type request: rest_framework.request.Request
-    :return: A list of projects or the created project details.
-    :rtype: rest_framework.response.Response
-    :raises: Exception if there's an error during project listing or creation.
+    :cvar queryset: All projects in the system.
+    :cvar serializer_class: Serializer class for project objects.
+    :cvar permission_classes: List of permission classes required.
     """
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -27,29 +40,29 @@ class ProjectListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         """
-        Get the queryset of projects for the authenticated user.
+        Return a queryset of projects owned by the authenticated user.
 
-        :return: A queryset of projects.
+        :return: QuerySet of Project instances.
         :rtype: django.db.models.query.QuerySet
         """
         return Project.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
         """
-        Save the new project with the authenticated user as the owner.
+        Save the new project setting the authenticated user as owner.
 
-        :param serializer: The project serializer.
+        :param serializer: The project serializer instance.
         :type serializer: ProjectSerializer
         """
         serializer.save(owner=self.request.user)
 
     def list(self, request, *args, **kwargs):
         """
-        List all projects for the authenticated user.
+        List projects owned by the authenticated user.
 
-        :param request: The HTTP request object.
+        :param request: The HTTP request instance.
         :type request: rest_framework.request.Request
-        :return: A list of projects.
+        :return: Response containing the list of projects.
         :rtype: rest_framework.response.Response
         """
         try:
@@ -64,9 +77,9 @@ class ProjectListCreateView(generics.ListCreateAPIView):
         """
         Create a new project for the authenticated user.
 
-        :param request: The HTTP request object.
+        :param request: The HTTP request instance.
         :type request: rest_framework.request.Request
-        :return: The created project details.
+        :return: Response containing the created project data.
         :rtype: rest_framework.response.Response
         """
         try:
@@ -80,20 +93,16 @@ class ProjectListCreateView(generics.ListCreateAPIView):
             logger.error(f"Error creating project for user {request.user.username}: {str(e)}")
             return Response({"error": "An error occurred while creating the project"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Retrieve, update, or delete a project instance.
+    Retrieve, update or delete a specific project instance.
 
-    This view provides GET, PUT, PATCH, and DELETE methods for a specific project.
+    This view provides GET, PUT, PATCH, and DELETE methods for a project.
 
-    :param request: The HTTP request object.
-    :type request: rest_framework.request.Request
-    :param pk: The primary key of the project.
-    :type pk: int
-    :return: The project details, updated project details, or a success message.
-    :rtype: rest_framework.response.Response
-    :raises: Project.DoesNotExist if the project is not found.
-    :raises: Exception if there's an error during project operations.
+    :cvar queryset: All projects in the system.
+    :cvar serializer_class: Serializer class for project objects.
+    :cvar permission_classes: List of permission classes required.
     """
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -101,22 +110,20 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         """
-        Get the queryset of projects for the authenticated user.
+        Return a queryset of projects owned by the authenticated user.
 
-        :return: A queryset of projects.
+        :return: QuerySet of Project instances.
         :rtype: django.db.models.query.QuerySet
         """
         return Project.objects.filter(owner=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieve a specific project instance.
+        Retrieve details of a specific project.
 
-        :param request: The HTTP request object.
+        :param request: The HTTP request instance.
         :type request: rest_framework.request.Request
-        :param pk: The primary key of the project.
-        :type pk: int
-        :return: The project details.
+        :return: Response containing project details.
         :rtype: rest_framework.response.Response
         """
         try:
@@ -133,13 +140,11 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def update(self, request, *args, **kwargs):
         """
-        Update a specific project instance.
+        Update a specific project.
 
-        :param request: The HTTP request object.
+        :param request: The HTTP request instance.
         :type request: rest_framework.request.Request
-        :param pk: The primary key of the project.
-        :type pk: int
-        :return: The updated project details.
+        :return: Response containing updated project data.
         :rtype: rest_framework.response.Response
         """
         try:
@@ -152,13 +157,11 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         """
-        Delete a specific project instance.
+        Delete a specific project.
 
-        :param request: The HTTP request object.
+        :param request: The HTTP request instance.
         :type request: rest_framework.request.Request
-        :param pk: The primary key of the project.
-        :type pk: int
-        :return: A success message.
+        :return: Response with HTTP 204 status code.
         :rtype: rest_framework.response.Response
         """
         try:
@@ -174,58 +177,49 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             logger.error(f"Error deleting project for user {request.user.username}: {str(e)}")
             return Response({"error": "An error occurred while deleting the project"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class UserProjectListView(generics.ListAPIView):
     """
-    List all projects for a specific user.
+    List projects for a specific user.
 
-    This view provides a GET method to retrieve all projects associated with a given user.
+    This view returns all projects associated with a given user ID.
 
-    :param request: The HTTP request object.
-    :type request: rest_framework.request.Request
-    :param user_id: The ID of the user whose projects are to be listed.
-    :type user_id: int
-    :return: A list of projects associated with the specified user.
-    :rtype: rest_framework.response.Response
+    :cvar serializer_class: Serializer class for project objects.
     """
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
         """
-        Get the queryset of projects for a specific user.
+        Return a queryset of projects for the specified user.
 
-        :return: A queryset of projects.
+        :return: QuerySet of Project instances.
         :rtype: django.db.models.query.QuerySet
         """
         user_id = self.kwargs['user_id']
         return Project.objects.filter(users__id=user_id)
 
+
 class ProjectUserAddView(generics.UpdateAPIView):
     """
     Add a user to a specific project.
 
-    This view provides a PUT method to add a user to a project.
+    This view supports adding an existing user (by user_id) to a project.
 
-    :param request: The HTTP request object.
-    :type request: rest_framework.request.Request
-    :param pk: The primary key of the project.
-    :type pk: int
-    :return: A success message if the user is added, or an error message if the user is not found.
-    :rtype: rest_framework.response.Response
-    :raises: User.DoesNotExist if the specified user is not found.
+    :cvar queryset: All projects in the system.
+    :cvar serializer_class: Serializer class for project objects.
     """
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
 
     def update(self, request, *args, **kwargs):
         """
-        Add a user to a specific project.
+        Add a user to the project specified by the primary key.
 
-        :param request: The HTTP request object.
+        :param request: The HTTP request instance.
         :type request: rest_framework.request.Request
-        :param pk: The primary key of the project.
-        :type pk: int
-        :return: A success message if the user is added, or an error message if the user is not found.
+        :return: Response with a success message.
         :rtype: rest_framework.response.Response
+        :raises User.DoesNotExist: If the specified user is not found.
         """
         project = self.get_object()
         user_id = request.data.get('user_id')
@@ -236,13 +230,19 @@ class ProjectUserAddView(generics.UpdateAPIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
 def send_to_scanner(zip_file_path):
     """
-    Simulate a tRPC call to the scanner container.
-    In production, this function would implement the actual tRPC client logic.
-    Returns a dummy SARIF JSON result.
+    Simulate a tRPC call to a scanner container.
+
+    In production, this function would implement real tRPC client logic.
+    It returns a dummy SARIF (Static Analysis Results Interchange Format) JSON structure.
+
+    :param zip_file_path: The file path to the uploaded ZIP file.
+    :type zip_file_path: str
+    :return: A dummy SARIF JSON result.
+    :rtype: dict
     """
-    # Dummy SARIF result (replace this with the actual logic)
     return {
         "version": "2.1.0",
         "runs": [{
@@ -251,74 +251,105 @@ def send_to_scanner(zip_file_path):
         }]
     }
 
+
 class InitiateScanView(generics.CreateAPIView):
     """
-    Initiate a scan for a specific project.
-    
-    This endpoint expects a multipart/form-data POST request with:
-      - URL parameter: project_id (the id of the project to scan)
-      - Form field "file": a ZIP file containing the code to be scanned
-      - Optional form fields "branch" and "commit"
-      
-    It simulates sending the zip to a scanner container via a tRPC interface
-    and returns SARIF-format JSON results.
+    Initiate a static code analysis scan for a project.
+
+    This view accepts a ZIP file upload containing the code to be scanned.
+    It simulates sending the file via a tRPC interface to a scanner container,
+    and stores the returned SARIF JSON result in an AnalysisResult.
+
+    :cvar parser_classes: List of parsers to handle multipart/form data.
     """
-    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
-        # Get project_id from URL kwargs
-        project_id = kwargs.get('project_id')
-        branch = request.data.get('branch')
-        commit = request.data.get('commit')
+        """
+        Initiate a scan for a specified project.
+
+        The request must include 'project_id' and a ZIP file under the key 'file'.
+
+        :param request: The HTTP request instance.
+        :type request: rest_framework.request.Request
+        :return: Response containing the analysis ID and results.
+        :rtype: rest_framework.response.Response
+        """
+        project_id = request.data.get('project_id')
         zip_file = request.FILES.get('file')
 
-        # Validate file upload
-        if not zip_file:
-            return Response({"error": "File upload required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not project_id or not zip_file:
+            return Response({"error": "project_id and file are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not zip_file.name.lower().endswith('.zip'):
-            return Response({"error": "Uploaded file must be a zip file"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "File must be a zip file"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            project = Project.objects.get(id=project_id, owner=request.user)
+            project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
             return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Save the uploaded ZIP file temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp:
             for chunk in zip_file.chunks():
                 tmp.write(chunk)
             tmp_path = tmp.name
 
         try:
-            # Simulate a tRPC call to the scanner container to get SARIF results
             sarif_result = send_to_scanner(tmp_path)
         except Exception as e:
             os.remove(tmp_path)
-            return Response({"error": f"Scanning failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"Scanning error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         os.remove(tmp_path)
-
-        # Store the analysis result in the database
-        analysis = AnalysisResult.objects.create(
-            project=project,
-            status="COMPLETED",
-            result=sarif_result
-        )
-
+        analysis = project.analysis_results.create(status="COMPLETED", result=sarif_result)
         return Response({"analysis_id": analysis.id, "result": sarif_result}, status=status.HTTP_201_CREATED)
+
+
+class ProjectVulnerabilitiesListView(generics.ListAPIView):
+    """
+    List all vulnerabilities associated with a specific project.
+
+    :cvar serializer_class: Serializer class for vulnerability objects.
+    """
+    serializer_class = None  # Will be set after importing VulnerabilitySerializer
+
+    def get_queryset(self):
+        """
+        Return a queryset of vulnerabilities for the specified project.
+
+        :return: QuerySet of Vulnerability instances.
+        :rtype: django.db.models.query.QuerySet
+        """
+        project_id = self.kwargs.get('project_id')
+        return Vulnerability.objects.filter(project_id=project_id)
+
+
+# Ensure VulnerabilitySerializer is imported and set in the view.
+from .serializers import ProjectSerializer
+from projects.models import Vulnerability
+from rest_framework import serializers
+
+class VulnerabilitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Vulnerability model.
+
+    This serializer handles conversion between Vulnerability instances and JSON.
+    """
+    class Meta:
+        model = Vulnerability
+        fields = '__all__'
+
+ProjectVulnerabilitiesListView.serializer_class = VulnerabilitySerializer
+
 
 class LogoutView(generics.GenericAPIView):
     """
-    Logout the user.
+    Log out the user by blacklisting the provided refresh token.
 
-    This view provides a POST method to log out the user.
+    This view requires the client to send a valid refresh token in the request data.
+    The refresh token is blacklisted to ensure it cannot be used again.
 
-    :param request: The HTTP request object.
-    :type request: rest_framework.request.Request
-    :return: A success message indicating the user has been logged out.
-    :rtype: rest_framework.response.Response
+    :cvar permission_classes: List containing IsAuthenticated.
     """
     permission_classes = [IsAuthenticated]
 
@@ -326,10 +357,24 @@ class LogoutView(generics.GenericAPIView):
         """
         Handle POST request to log out the user.
 
-        :param request: The HTTP request object.
+        The request must include the refresh token under the key "refresh".
+
+        :param request: The HTTP request instance.
         :type request: rest_framework.request.Request
-        :return: A success message indicating the user has been logged out.
+        :return: Response indicating successful logout.
         :rtype: rest_framework.response.Response
+        :raises KeyError: If the refresh token is not provided.
+        :raises Exception: For any other errors during logout.
         """
-        # Add logic here to log out the user
-        return Response({"message": "User logged out successfully"}, status=status.HTTP_200_OK)
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            logger.info(f"User {request.user.username} logged out successfully.")
+            return Response({"message": "User logged out successfully"}, status=status.HTTP_200_OK)
+        except KeyError:
+            logger.error(f"Logout error: Refresh token not provided by user {request.user.username}.")
+            return Response({"error": "Refresh token not provided"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error logging out user {request.user.username}: {str(e)}")
+            return Response({"error": "An error occurred during logout"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
