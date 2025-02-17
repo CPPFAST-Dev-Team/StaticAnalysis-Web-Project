@@ -16,11 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.urls.conf import include
+from projects.views import (
+    ProjectListCreateView,
+    ProjectRetrieveUpdateDestroyView,
+    ProjectUserAddView,
+    UserProjectListView,
+    InitiateScanView,
+    LogoutView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('projects.urls')),
-    path('api/', include('static_analysis.urls')),
-    path('api/auth/', include('user_authentication.urls')),
+    path('api/projects/', ProjectListCreateView.as_view(), name='project-list'),
+    path('api/projects/<int:pk>/', ProjectRetrieveUpdateDestroyView.as_view(), name='project-detail'),
+    path('api/projects/<int:pk>/add-user/', ProjectUserAddView.as_view(), name='project-add-user'),
+    path('api/user/<int:user_id>/projects/', UserProjectListView.as_view(), name='user-project-list'),
+    path('api/scan/<int:project_id>/', InitiateScanView.as_view(), name='initiate-scan'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
 ]
