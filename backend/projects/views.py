@@ -235,47 +235,78 @@ class ProjectUserAddView(generics.UpdateAPIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+def send_to_scanner(zip_file_path):
+    """
+    Simulate a tRPC call to the scanner container.
+    In production, this function would implement the actual tRPC client logic.
+    Returns a dummy SARIF JSON result.
+    """
+    # Dummy SARIF result (replace this with the actual logic)
+    return {
+        "version": "2.1.0",
+        "runs": [{
+            "tool": {"driver": {"name": "DummyScanner"}},
+            "results": []
+        }]
+    }
+
 class InitiateScanView(generics.CreateAPIView):
     """
     Initiate a scan for a specific project.
-
-    This view provides a POST method to initiate a scan for a project.
-
-    :param request: The HTTP request object.
-    :type request: rest_framework.request.Request
-    :param project_id: The ID of the project to be scanned.
-    :type project_id: int
-    :return: A success message if the scan is initiated, or an error message if the project is not found.
-    :rtype: rest_framework.response.Response
-    :raises: Project.DoesNotExist if the specified project is not found.
+    
+    This endpoint expects a multipart/form-data POST request with:
+      - URL parameter: project_id (the id of the project to scan)
+      - Form field "file": a ZIP file containing the code to be scanned
+      - Optional form fields "branch" and "commit"
+      
+    It simulates sending the zip to a scanner container via a tRPC interface
+    and returns SARIF-format JSON results.
     """
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
-        """
-        Initiate a scan for a specific project.
-
-        :param request: The HTTP request object.
-        :type request: rest_framework.request.Request
-        :param project_id: The ID of the project to be scanned.
-        :type project_id: int
-        :return: A success message if the scan is initiated, or an error message if the project is not found.
-        :rtype: rest_framework.response.Response
-        """
+        # Get project_id from URL kwargs
         project_id = kwargs.get('project_id')
         branch = request.data.get('branch')
         commit = request.data.get('commit')
+        zip_file = request.FILES.get('file')
+
+        # Validate file upload
+        if not zip_file:
+            return Response({"error": "File upload required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not zip_file.name.lower().endswith('.zip'):
+            return Response({"error": "Uploaded file must be a zip file"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             project = Project.objects.get(id=project_id, owner=request.user)
-            # Add logic here to initiate the scan
-            # Update issue counts based on scan results
-            return Response({"message": "Scan initiated successfully"}, status=status.HTTP_200_OK)
         except Project.DoesNotExist:
             return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Save the uploaded ZIP file temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp:
+            for chunk in zip_file.chunks():
+                tmp.write(chunk)
+            tmp_path = tmp.name
+
+        try:
+            # Simulate a tRPC call to the scanner container to get SARIF results
+            sarif_result = send_to_scanner(tmp_path)
         except Exception as e:
-            logger.error(f"Error initiating scan for project {project_id}: {str(e)}")
-            return Response({"error": "An error occurred while initiating the scan"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            os.remove(tmp_path)
+            return Response({"error": f"Scanning failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        os.remove(tmp_path)
+
+        # Store the analysis result in the database
+        analysis = AnalysisResult.objects.create(
+            project=project,
+            status="COMPLETED",
+            result=sarif_result
+        )
+
+        return Response({"analysis_id": analysis.id, "result": sarif_result}, status=status.HTTP_201_CREATED)
 
 class LogoutView(generics.GenericAPIView):
     """
