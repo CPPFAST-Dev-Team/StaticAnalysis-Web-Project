@@ -5,6 +5,7 @@ from .models import Project
 from .serializers import ProjectSerializer
 import logging
 from django.contrib.auth.models import User
+from rest_framework.parsers import MultiPartParser, FormParser
 
 logger = logging.getLogger(__name__)
 
