@@ -307,22 +307,29 @@ class InitiateScanView(generics.CreateAPIView):
 
 class ProjectVulnerabilitiesListView(generics.ListAPIView):
     """
-    List all vulnerabilities associated with a specific project.
+    List all vulnerabilities for a specific project with severity color coding.
 
-    :cvar serializer_class: Serializer class for vulnerability objects.
+    The response will include a computed "color" field per vulnerability:
+       - LOW: green,
+       - MEDIUM: yellow,
+       - SEVERE: red.
+
+    This is used to easily present severity levels in the frontend.
     """
-    serializer_class = None  # Will be set after importing VulnerabilitySerializer
+    serializer_class = VulnerabilitySerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """
-        Return a queryset of vulnerabilities for the specified project.
-
-        :return: QuerySet of Vulnerability instances.
+        Return vulnerabilities that belong to the requested project.
+        
+        The project ID is taken from the URL keyword arguments.
+        
+        :return: QuerySet of Vulnerability instances for the project.
         :rtype: django.db.models.query.QuerySet
         """
         project_id = self.kwargs.get('project_id')
         return Vulnerability.objects.filter(project_id=project_id)
-
 
 # Ensure VulnerabilitySerializer is imported and set in the view.
 from .serializers import ProjectSerializer

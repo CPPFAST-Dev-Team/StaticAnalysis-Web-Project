@@ -37,28 +37,33 @@ class Project(models.Model):
 
 class Vulnerability(models.Model):
     """
-    Represents a security vulnerability found in a project.
+    Represents a vulnerability found in a project.
 
     :param project: The project associated with this vulnerability.
     :type project: Project
-    :param vuln_code: A unique code identifier for the vulnerability.
-    :type vuln_code: str
-    :param description: A detailed description of the vulnerability.
-    :type description: str
-    :param severity: The severity level of the vulnerability.
-                     This could be values like "Low", "Medium", "High", etc.
+    :param name: The name of the vulnerability.
+    :type name: str
+    :param file_location: The file location where the vulnerability was found.
+    :type file_location: str
+    :param line: The line number where the vulnerability was found.
+    :type line: int
+    :param vuln_id: The unique identifier for the vulnerability.
+    :type vuln_id: str
+    :param severity: The severity of the vulnerability. Must be one of 'LOW', 'MEDIUM', or 'SEVERE'.
     :type severity: str
+    :param summary: A brief summary of the vulnerability.
+    :type summary: str
+    :param confidence: The confidence level of the vulnerability detection.
+    :type confidence: Decimal
     """
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="vulnerabilities")
-    vuln_code = models.CharField(max_length=50)
-    description = models.TextField()
-    severity = models.CharField(max_length=20)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name="vulnerabilities")
+    name = models.CharField(max_length=30)
+    file_location = models.CharField(max_length=30)
+    line = models.BigIntegerField()
+    vuln_id = models.CharField(max_length=30)
+    severity = models.CharField(max_length=30)  # Expected values: 'LOW', 'MEDIUM', 'SEVERE'
+    summary = models.CharField(max_length=200)
+    confidence = models.DecimalField(max_digits=3, decimal_places=2)
 
     def __str__(self):
-        """
-        Returns a string representation of the Vulnerability.
-
-        :return: A formatted string showing the vulnerability code and its severity level.
-        :rtype: str
-        """
-        return f"{self.vuln_code} ({self.severity})"
+        return f"{self.name} ({self.severity})"

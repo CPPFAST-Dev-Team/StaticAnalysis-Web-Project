@@ -2,16 +2,31 @@ from rest_framework import serializers
 from .models import Project, Vulnerability
 
 class ProjectSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Project model.
+    users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
-    This serializer handles the conversion between Project instances and their JSON representations.
-    """
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'repository_url', 'owner', 'created_at', 'updated_at', 'users']
+        read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
 
 class VulnerabilitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Vulnerability model.
+    
+    Computes a color based on severity:
+      LOW -> green, MEDIUM -> yellow, SEVERE -> red.
+    """
+    color = serializers.SerializerMethodField()
+
     class Meta:
         model = Vulnerability
-        fields = '__all__'
+        fields = ['id', 'project', 'name', 'file_location', 'line', 'vuln_id', 'severity', 'summary', 'confidence', 'color']
+
+    def get_color(self, obj):
+        severity_mapping = {
+            "LOW": "green",
+            "MEDIUM": "yellow",
+            "SEVERE": "red"
+        }
+        # Use uppercase comparison to handle case variations.
+        return severity_mapping.get(obj.severity.upper(), "unknown")
