@@ -5,7 +5,7 @@ import { appRouter } from './router';
 const server = createHTTPServer({
     router: appRouter
 });
-const port = 3000;
+const port = 6000;
 
 console.info(`Launching server on port ${port}`);
 server.listen(port);
