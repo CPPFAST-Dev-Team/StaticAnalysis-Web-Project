@@ -1,3 +1,3 @@
 #!/bin/sh
 
-node /scanner/dist/index.js
+node /scanner/index.js
