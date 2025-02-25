@@ -29,7 +29,7 @@ const routes = [
         component: New_Project
     },
     {
-        path:'/new-scan/',
+        path:'/new-scan/:projectId',
         name:'New_Scan',
         component: New_Scan
     },

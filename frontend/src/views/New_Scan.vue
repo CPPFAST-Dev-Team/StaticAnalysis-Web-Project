@@ -4,7 +4,7 @@
     </head>
     <div class="input-container">
         <div class="header">
-            <h1>New Scan of Placeholder.com/example </h1>
+            <h1>New Scan of {{ projectName }} </h1>
         </div>
 
         <form class="input-group">
@@ -23,9 +23,9 @@
         </form>
 
         <div class="create">
-            <router-link to="/issues" class="createbtn">
+            <button @click="postNewScan" class="createbtn">
                 <text>Initiate</text>
-            </router-link>
+            </button>
         </div>
         
     </div>
@@ -33,20 +33,50 @@
 
 <script setup>
 import Dropdown from '../components/Dropdown.vue'
-import { ref, onMounted} from 'vue'
+import api from '../api'
 
+import { ref, inject } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+let projectName = ref('')
 const commitInput = ref('')
 const branches = ref([])
 const selectedBranch = ref(null)
 
+const router = useRouter()
+const route = useRoute()
+const toggleNotification = inject('toggleNotification')
+const projectId = route.params.projectId
 
-onMounted(() => {
-    branches.value = getBranches()
-})
+getProjects()
 
-function getBranches(){
-    return ['Branch', 'Frontend Branch', 'BackendBranch'] //fetch branches here
+async function getProjects(){
+    try{
+        const response = await api.get(`/api/projects/${projectId}/`)
+        projectName.value = response.data.name
+        branches.value = ['Branch', 'Frontend Branch', 'BackendBranch']
+    }
+    catch(err){
+        console.log(err)
+    }
 }
+
+async function postNewScan(){
+    try{
+        const response = await api.post(`/api/scan/${projectId}/`)
+        if(err?.response?.data?.message){
+            toggleNotification(err.response.data.message, 'success')
+        }
+        router.push({ name: Issues, params: { projectId: projectId} })
+    }
+    catch(err){
+        if(err?.response?.data?.error){
+            toggleNotification(err.response.data.error, 'alert')
+        }
+        console.log(err)
+    }
+}
+
 </script>
 
 <style scoped>
