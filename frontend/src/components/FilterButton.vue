@@ -46,15 +46,23 @@
 <script setup>
     import { ref, onMounted, onUnmounted } from 'vue'
 
+    const props = defineProps({
+        leftColumnOptions: {
+            type: Array,
+            required: true,
+        },
+        rightColumnOptions: {
+            type: Array,
+            required: true,
+        }
+    })
+
     const emit = defineEmits(['update:modelValue']) //defines what events the child can emit to the parent
 
     const FilterButton = ref(null)
     const FilterOptions = ref(null)
     const showFilter = ref(false)
-    const selectedOptions = ref([])
-
-    const leftColumnOptions = ['High Severity', 'Medium Severity', 'Low Severity']
-    const rightColumnOptions = ['High Confidence', 'Low Confidence']
+    const selectedOptions = ref([...props.leftColumnOptions, ...props.rightColumnOptions])
 
     const isSmallScreen = ref(window.innerWidth < 400)
 

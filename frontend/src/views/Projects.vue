@@ -61,7 +61,6 @@
     async function getProjects(){
         const projectsResponse = await api.get("api/projects/")
         let temp = []
-        console.log(projectsResponse.data)
         for (const project of projectsResponse.data){
             const vulnerabilities = await api.get(`api/projects/${project.id}/vulnerabilities/`)
             

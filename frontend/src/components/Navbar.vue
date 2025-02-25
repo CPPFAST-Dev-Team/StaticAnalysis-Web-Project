@@ -24,10 +24,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 const showDropdown = ref(false)
 
+const route = useRoute()
 const router = useRouter()
 const logged = computed(() => !!localStorage.getItem('access'))
 
@@ -38,6 +39,10 @@ function logout(){
 
     router.push('/')
 }
+
+watch(route, () => {
+    showDropdown.value = false;
+})
 
 function toggleDropdown(){
     showDropdown.value = !showDropdown.value

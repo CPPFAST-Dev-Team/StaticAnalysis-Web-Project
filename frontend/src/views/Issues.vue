@@ -7,11 +7,16 @@
                 </h1>
             </a>
             <div class="btn-group">
-                <FilterButton v-model="selectedFilters"/>
-                <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
+                <FilterButton 
+                    v-model="selectedFilters"
+                    :leftColumnOptions="['High Severity', 'Medium Severity', 'Low Severity']"
+                    :rightColumnOptions="['High Confidence', 'Low Confidence']"
+                    @update:model-value="filterIssues"
+                />
+                <router-link :to="`/new-scan/${projectId}`" class="btn-scan">New Scan</router-link>
             </div>
         </div>
-        <div class="issue-wrapper" v-for="issue in issues">
+        <div class="issue-wrapper" v-for="issue in displayedIssues">
             <component :is="issueComponent" v-bind="issue"/> <!-- dynamically assign issue component -->
         </div>
         <br/>
@@ -29,7 +34,7 @@
         <br/>
         <div class="btn-group">
             <router-link to="/projects" class="btn-project">Back To Projects</router-link>
-            <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
+            <router-link :to="`/new-scan/${projectId}`" class="btn-scan">New Scan</router-link>
         </div>
     </div>
 </template>
@@ -52,11 +57,12 @@
     library.add(fas)
 
     const route = useRoute()
+    let issues = []
     
     const projectId = route.params.projectId
     const project = ref({})
-    const issues = ref([])
-    const selectedFilters = ref([]) //selectedFilters emitted from child component FilterButton
+    const displayedIssues = ref([])
+    const selectedFilters = ref(['High Severity', 'Medium Severity', 'Low Severity', 'High Confidence', 'Low Confidence']) //selectedFilters emitted from child component FilterButton
     const isMobile = ref(window.innerWidth < 768)
     const issueComponent = computed(() => isMobile.value ? Display_issue_mobile : Issue) //dynamically compute component based on isMobile, will recompute after each state change of isMobile
 
@@ -74,11 +80,52 @@
             const issuesResponse = await api.get(`api/projects/${projectId}/vulnerabilities/`)
 
             project.value = projectResponse.data
-            issues.value = issuesResponse.data
+
+            issues = issuesResponse.data.sort(function (issue1, issue2){
+                const severityDifference = severityToInteger(issue2.severity) - severityToInteger(issue1.severity)
+                const confidenceDifference = parseFloat(issue2.confidence) - parseFloat(issue1.confidence)
+                return severityDifference || confidenceDifference
+            })
+            filterIssues()
         }
         catch(err){
             console.log(err)
         }
+
+        //assign int to determine hierarchy of severity category
+        function severityToInteger(severity) {
+            switch (severity) {
+                case "SEVERE":
+                    return 3;
+                case "MEDIUM":
+                    return 2;
+                case "LOW":
+                    return 1;
+                default:
+                    return 0;
+            }
+        }
+    }
+    function filterIssues(){
+        displayedIssues.value = issues.filter(issue => {
+            if(issue.severity === 'SEVERE' && selectedFilters.value.includes('High Severity')){
+                return true
+            }
+            else if(issue.severity === 'MEDIUM' && selectedFilters.value.includes('Medium Severity')){
+                return true
+            }
+            if(issue.severity === 'LOW' && selectedFilters.value.includes('Low Severity')){
+                return true
+            }
+
+            if(parseFloat(issue.confidence) >= .75  && selectedFilters.value.includes('High Confidence')){
+                return true
+            } 
+            else if(parseFloat(issue.confidence) < .75 && selectedFilters.value.includes('Low Confidence')){
+                return true
+            }
+            return false
+        })
     }
     function updateIsMobile(){
         isMobile.value = window.innerWidth < 768
