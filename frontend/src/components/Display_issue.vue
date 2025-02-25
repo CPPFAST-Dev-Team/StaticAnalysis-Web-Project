@@ -2,21 +2,21 @@
   <div class="box">
     <div class="left">
       <h2>Issue</h2>
-      <h2>{{fileName}}</h2>
-      <h2>Line: {{line}}</h2>
+      <h2>{{ file_location }}</h2>
+      <h2>Line: {{ line }}</h2>
     </div>
     <div class="center">
       <div class="btn-group">
-        <button class="btn-red"><text>{{ issueName }}</text></button>
-        <button class="btn-red"><text>Severity: High</text></button>
+        <button :class="getIssueButton"><text>{{ name }}</text></button>
+        <button :class="getIssueButton"><text>Severity: {{ severity }}</text></button>
       </div>
       <div class="text-space">
-        <text>{{ errorText }}</text>
+        <text>{{ summary }}</text>
       </div>
     </div>
     <div class="right">
       <div class="btn-group">
-        <button class="btn-blue"><text>Confidence: {{ confidence }}%</text></button>
+        <button class="btn-blue"><text>Confidence: {{ confidenceAsPercentage }}</text></button>
         <button class="btn-white"><text>Why?</text></button>
       </div>
       <button class="btn-view"><text>View</text></button>
@@ -25,13 +25,18 @@
 </template>
 
 <script setup>
+  import { computed } from 'vue'
   // Define props
-  defineProps({
-    fileName: {
+  const props = defineProps({
+    id: {
+      type: Number,
+      required: true
+    },
+    name: {
       type: String,
       required: true,
     },
-    issueName: {
+    file_location: {
       type: String,
       required: true,
     },
@@ -39,15 +44,33 @@
       type: Number,
       required: true,
     },
-    errorText: {
+    summary: {
       type: String,
       required: true,
     },
+    severity: {
+      type: String,
+      required: true
+    },
     confidence: {
-      type: Number,
+      type: String,
       required: true,
     },
   });
+
+  const getIssueButton = computed(() => {
+    if (props.severity === "SEVERE") {
+      return 'btn-red';
+    } else if (props.severity === "MEDIUM") {
+      return 'btn-yellow';
+    } else {
+      return 'btn-blue';
+    }
+  });
+
+  const confidenceAsPercentage = computed(() => {
+    return `${parseFloat(props.confidence) * 100}%`
+  })
 </script>
 
  <style scoped>
@@ -135,6 +158,7 @@
 .btn-group .btn-yellow {
   background-color: #FFFF66;
   color: black;
+  border: 1px solid gray;
 }
 .btn-group .btn-blue {
   background-color: #063970;
@@ -166,7 +190,6 @@
 .text-space {
   display: flex;
   align-items: center;
-  justify-content: center;
   margin-left: 10px;
   height: 100%;
   width: 130%;

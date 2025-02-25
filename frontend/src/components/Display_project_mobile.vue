@@ -9,21 +9,38 @@
 
         <div class="issues-wrapper">
             <h2>Issues</h2>
-            <div class="btn-group">
-                <button class="btn-red">{{ high_vulnerabilities }}</button>
-                <button class="btn-yellow">{{ medium_vulnerabilities }}</button>
-            </div>
-            <div class="btn-group">
-                <button class="btn-blue">{{ low_vulnerabilities }}</button>
-                <button class="btn-view" @click="navigateToIssues">View All</button>
+            <div class="btn-wrapper">
+              <div class="btn-group">
+                  <button class="btn-red">{{ high_vulnerabilities }}</button>
+                  <button class="btn-yellow">{{ medium_vulnerabilities }}</button>
+                  <button class="btn-blue">{{ low_vulnerabilities }}</button>
+              </div>
+              <div class="btn-group">
+                  <button class="btn-view" @click="navigateToIssues">View All</button>
+                  <button 
+                    class="btn-red"
+                    @click="showConfirm({
+                      message: `Are you sure you want to delete project ${name}? This action is irreversible.`,
+                      action: 'Delete',
+                      handler: deleteProject,
+                    })"
+                  > 
+                    Delete 
+                  </button>
+              </div>
             </div>
         </div>
     </div>
    </template>
    
 <script setup>
+  import { inject }from 'vue'
   import { useRouter } from 'vue-router';
+  import api from '../api';
+
   const router = useRouter()
+  const toggleNotification = inject('toggleNotification')
+  const showConfirm = inject('showConfirm')
   // Define props
   const props = defineProps({
     id:{
@@ -34,30 +51,42 @@
       type: String,
       required: true
     },
-     repository_url: {
-       type: String,
-       required: true
-     },
-     imgSrc:{
-       type: String,
-       required: true,
-     },
-     high_vulnerabilities: {
-       type: Number,
-       required: true
-     },
-     medium_vulnerabilities: {
-       type: Number,
-       required: true
-     },
-     low_vulnerabilities: {
-       type: Number,
-       required: true
-     },
-   });
+    repository_url: {
+      type: String,
+      required: true
+    },
+    imgSrc:{
+      type: String,
+    },
+    high_vulnerabilities: {
+      type: Number,
+      required: true
+    },
+    medium_vulnerabilities: {
+      type: Number,
+      required: true
+    },
+    low_vulnerabilities: {
+      type: Number,
+      required: true
+    },
+  });
+
+  const emit = defineEmits(['delete'])
 
   function navigateToIssues(){
-    router.push({name: "Issues", params: {projectId: props.id}})
+      router.push({name: "Issues", params: {projectId: props.id} })
+  }
+  async function deleteProject(){
+    try{
+      await api.delete(`api/projects/${props.id}/`)
+      emit('delete')
+      toggleNotification(`Project ${props.name} successfully deleted`, 'success')
+    }
+    catch(err){
+      console.log(err)
+    }
+      
   }
 </script>
    
@@ -98,13 +127,21 @@
   width: 100%;
   height: 75%;
 }
-.btn-group {
+.btn-wrapper {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
-  align-items: space-between;
-  height: 50%;
+  height: 100%;
   width: 100%;
+  max-width: 400px;
+  align-items: center;
+}
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+  align-items: center;
+  height: 100%;
+  width: 50%;
   padding: 10px;
 }
 img {
@@ -117,9 +154,9 @@ img {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  max-width: 200px;
   border-radius: 5px;
-  height: 100%;
-  width: 40%;
   border: 1px solid black;
   cursor: pointer;
 }

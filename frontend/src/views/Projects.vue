@@ -3,15 +3,19 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <div class="container" v-if="projects.length>0">
-        <div>
-            <div class="header">
-                <h1>Projects</h1>
-                <router-link to="/new-project" class="btn-create">Create New</router-link>
-            </div>
-            <div class="project-wrapper" v-for="project in projects">
-                <component :is="projectComponent" v-bind="project"/> <!-- dynamically assign component based on isMobile -->
-            </div>
+        <div class="header">
+            <h1>Projects</h1>
+            <router-link to="/new-project" class="btn-create">Create New</router-link>
         </div>
+        <div class="project-wrapper" v-for="project in projects">
+            <!-- dynamically assign component based on isMobile -->
+            <component
+                :is="projectComponent"
+                v-bind="project" 
+                @delete="getProjects"
+            />
+        </div>
+        <br/>
     </div>
     <div class="empty-container" v-else>
         <text class="empty">No Projects Yet</text>
@@ -55,14 +59,26 @@
     }
 
     async function getProjects(){
-        const response = await api.get("api/projects/")
-        projects.value = response.data.map(project => ({
-            ...project,
-            high_vulnerabilities: 123,
-            medium_vulnerabilities: 456,
-            low_vulnerabilities: 789,
-            imgSrc: ""
-        }))
+        const projectsResponse = await api.get("api/projects/")
+        let temp = []
+        console.log(projectsResponse.data)
+        for (const project of projectsResponse.data){
+            const vulnerabilities = await api.get(`api/projects/${project.id}/vulnerabilities/`)
+            
+            const { SEVERE: high_vulnerabilities = 0, MEDIUM: medium_vulnerabilities = 0, LOW: low_vulnerabilities = 0 } =
+                vulnerabilities.data.reduce((acc, vulnerability) => {
+                    acc[vulnerability.severity] = (acc[vulnerability.severity] || 0) + 1;
+                    return acc;
+                }, {});
+                
+            temp.push({
+                ...project,
+                high_vulnerabilities,
+                medium_vulnerabilities,
+                low_vulnerabilities,
+            })
+        }
+        projects.value = temp;
     }
 
 </script>
@@ -78,7 +94,7 @@
         padding: 25px;
     }
     .project-wrapper{
-        margin: 20px 0px 20px 0px;
+        margin-bottom: 20px;
     }
     .header{
         display: flex;
@@ -86,6 +102,8 @@
         align-items: center;
         justify-content: flex-start;
         height: 10%;
+        min-height: fit-content;
+        margin-bottom: 20px;
     }
     @media(max-width: 767px){
         .header{

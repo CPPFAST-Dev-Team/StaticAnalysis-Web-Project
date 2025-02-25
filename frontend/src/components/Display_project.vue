@@ -22,14 +22,26 @@
       <button class="btn-view" @click="navigateToIssues">
         <text>Open</text>
       </button>
+      <button class="btn-delete" @click="showConfirm({
+        message: `Are you sure you want to delete project ${name}? This action is irreversible.`,
+        action: 'Delete',
+        handler: deleteProject,
+      })">
+        <text>Delete</text>
+      </button>
     </div>
   </div>
  </template>
  
  
  <script setup>
+  import { inject }from 'vue'
   import { useRouter } from 'vue-router';
+  import api from '../api';
+
   const router = useRouter()
+  const toggleNotification = inject('toggleNotification')
+  const showConfirm = inject('showConfirm')
   // Define props
    const props = defineProps({
     id:{
@@ -62,8 +74,21 @@
      },
    });
 
+   const emit = defineEmits(['delete'])
+
    function navigateToIssues(){
       router.push({name: "Issues", params: {projectId: props.id} })
+   }
+   async function deleteProject(){
+    try{
+      await api.delete(`api/projects/${props.id}/`)
+      emit('delete')
+      toggleNotification(`Project ${props.name} successfully deleted`, 'success')
+    }
+    catch(err){
+      console.log(err)
+    }
+      
    }
  </script>
  
@@ -137,11 +162,12 @@
  
  .right {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 15%;
   height: 100%;
-  margin: 0;
+  row-gap: 10px;
   padding: 5px;
   border: 1px solid transparent;
   border-radius: 15px;
@@ -203,7 +229,7 @@
  }
  
  
- .btn-view {
+ .btn-view, .btn-delete {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -214,9 +240,13 @@
   border-radius: 10px;
   cursor: pointer;
  }
+.btn-delete {
+  background-color: #E51400;
+  border: 1px solid gray;
+}
  
  
- .btn-group button:hover, .btn-group a:hover, .btn-view:hover {
+ .btn-group button:hover, .btn-group a:hover, .btn-view:hover, .btn-delete:hover {
   opacity: 0.8;
  }
 
@@ -226,7 +256,7 @@
  
  
  h2 {
-  font-size: 1rem;
+  font-size: 20px;
   margin: 10px;
   word-break: break-word;
  }

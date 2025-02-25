@@ -1,7 +1,11 @@
 <template>
-    <div class="container">
+    <div class="container" v-if="issues.length > 0">
         <div class="header">
-            <h1 class="word-wrap">{{ project.name }}</h1>
+            <a :href="project.repository_url">
+                <h1 class="word-wrap">
+                    {{ project.name }}
+                </h1>
+            </a>
             <div class="btn-group">
                 <FilterButton v-model="selectedFilters"/>
                 <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
@@ -9,6 +13,23 @@
         </div>
         <div class="issue-wrapper" v-for="issue in issues">
             <component :is="issueComponent" v-bind="issue"/> <!-- dynamically assign issue component -->
+        </div>
+        <br/>
+    </div>
+    <div class="empty-container" v-else>
+        <a :href="project.repository_url">
+            <text class = "empty">
+                {{ project.name }}
+            </text>
+        </a>
+        <br/>
+        <text class="empty-sub">No issues </text>
+        <br/>
+        <FontAwesomeIcon size="5x" color="#063970" icon="fa-solid fa-thumbs-up" />
+        <br/>
+        <div class="btn-group">
+            <router-link to="/projects" class="btn-project">Back To Projects</router-link>
+            <router-link to="/new-scan" class="btn-scan">New Scan</router-link>
         </div>
     </div>
 </template>
@@ -23,6 +44,13 @@
     import { ref, computed, onMounted, onUnmounted } from "vue"
     import { useRoute } from 'vue-router';
 
+    import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+    import { fas } from '@fortawesome/free-solid-svg-icons'
+    import { library } from '@fortawesome/fontawesome-svg-core'
+
+    // Add icons to the library
+    library.add(fas)
+
     const route = useRoute()
     
     const projectId = route.params.projectId
@@ -33,7 +61,7 @@
     const issueComponent = computed(() => isMobile.value ? Display_issue_mobile : Issue) //dynamically compute component based on isMobile, will recompute after each state change of isMobile
 
     onMounted(async () => {
-        issues.value = await getIssues()
+        await getIssues()
         window.addEventListener('resize', updateIsMobile) //add event listener to check if width is mobile
     })
     onUnmounted(() => {
@@ -42,14 +70,15 @@
 
     async function getIssues(){
         try{
-            const response = await api.get(`api/projects/${projectId}/`)
-            project.value = response.data
-            console.log(response.data)
+            const projectResponse = await api.get(`api/projects/${projectId}/`)
+            const issuesResponse = await api.get(`api/projects/${projectId}/vulnerabilities/`)
+
+            project.value = projectResponse.data
+            issues.value = issuesResponse.data
         }
         catch(err){
             console.log(err)
         }
-        return issuesData //fetch from issues API, dummy data for now from issuesData.js
     }
     function updateIsMobile(){
         isMobile.value = window.innerWidth < 768
@@ -112,7 +141,10 @@ h1{
     font-size: 1.5rem;
     font-family: 'DM Sans', sans-serif;
 }
-.btn-scan{
+.btn-scan, .btn-project{
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 30px;
     width: 200px;
     max-width: 100%;
@@ -123,8 +155,15 @@ h1{
     border-radius: 10px;
     font-size: 1rem;
 }
+.btn-project{
+    background-color: #063970;
+    color: white;
+}
 @media(max-width: 768px){
     .btn-scan{
+        width: 100%;
+    }
+    .btn-project{
         width: 100%;
     }
 }
@@ -175,6 +214,25 @@ button:hover{
 .options-wrapper footer button:hover{
     cursor: pointer;
     opacity: 0.8;
+}
+
+.empty-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    max-width: 1200px;
+    padding: 25px;
+}
+.empty, .empty-sub{
+    text-align: "center";
+    color: #063970;
+    font-size: 2rem;
+    font-family: 'DM Sans', sans-serif;
+}
+.empty-sub{
+    font-size: 1.5rem;
 }
 
 /* text styles */
