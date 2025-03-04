@@ -166,42 +166,4 @@
     .btn-start-project:hover{
         opacity: 0.5;
     }
-
-    .pagination-wrapper{
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        min-height: 75px;
-        width: 100%;
-    }
-    .pagination-box, .selected-pagination-box{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 20px;
-        width: 30px;
-        margin-right: 10px;
-        border: 1px solid #063970;
-    }
-    .selected-pagination-box{
-        background-color: #063970;
-        color: white;
-    }
-    .pagination-spread{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-right: 10px;
-    }
-    .pagination-wrapper i{
-        color: #063970;
-        margin-right: 10px;
-    }
-    .pagination-box:hover, .pagination-spread:hover, .pagination-wrapper i:hover{
-        cursor: pointer;
-    }
-    .pagination-box:hover{
-        background-color: lightgray;
-    }
 </style>

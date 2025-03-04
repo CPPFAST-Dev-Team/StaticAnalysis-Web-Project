@@ -19,7 +19,10 @@
         <div class="issue-wrapper" v-for="issue in displayedIssues">
             <component :is="issueComponent" v-bind="issue"/> <!-- dynamically assign issue component -->
         </div>
-        <br/>
+        <Pagination
+            :pages=50
+            @change-page="handlePageChange"
+        />
     </div>
     <div class="empty-container" v-else>
         <a :href="project.repository_url">
@@ -40,9 +43,10 @@
 </template>
 
 <script setup>
-    import Issue from '../components/Display_issue.vue'
     import Display_issue_mobile from '../components/Display_issue_mobile.vue';
     import FilterButton from '../components/FilterButton.vue'
+    import Issue from '../components/Display_issue.vue'
+    import Pagination from '../components/Pagination.vue';
     import api from '../api';
     import { issuesData } from "../issuesData.js"
 
@@ -126,6 +130,9 @@
             }
             return false
         })
+    }
+    function handlePageChange(newPage){
+        console.log(newPage)
     }
     function updateIsMobile(){
         isMobile.value = window.innerWidth < 768

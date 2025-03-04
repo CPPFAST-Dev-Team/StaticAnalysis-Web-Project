@@ -17,14 +17,11 @@
   })
   function toggleNotification(message, className){ //function to toggle a notification for three seconds
     notification.show = true
-    notification.class = className + " active" //add active class to translate downwards
+    notification.class = className
     notification.message = message
 
     setTimeout(() => {
-      notification.class = className
-    }, 10)
-    setTimeout(() => {
-        notification.show = false
+      notification.show = false
     }, 3000);
   }
 
@@ -54,10 +51,12 @@
     </div>
   </div>
   <div class="notification-container">
-    <div :class="notification.class" v-if="notification.show"> <!--dynamically assign class of div element and render based on show property of notification-->
-        <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-        <text class="alert-text">{{notification.message}}</text>
-    </div>
+      <Transition name="notification">
+        <div :class="notification.class" v-if="notification.show"> <!--dynamically assign class of div element and render based on show property of notification-->
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+            <text class="alert-text">{{notification.message}}</text>
+        </div>
+      </Transition>
   </div>
   <div class="confirm-overlay" v-if="confirm.show">
     <div class="confirm-container">
@@ -96,11 +95,22 @@
 
   .notification-container{
     position: fixed;
-    top: 10vh;
+    top: 20vh;
     width: 100vw;
     display: flex;
     justify-content: center;
     z-index: 100;
+  }
+  .notification-enter-active, .notification-leave-active {
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  .notification-enter-from, .notification-leave-to {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+  .notification-enter-to, .notification-leave-from {
+    transform: translateY(0);
+    opacity: 1;
   }
   .alert, .success{
     display: flex;
@@ -112,12 +122,7 @@
     max-width: min(500px, 70vw);
     background-color: #FFCCCB;
     border: 1px solid red;
-    transform: translateY(50px); 
-    transition: transform 0.4s ease-in-out;
     opacity: 0.9;
-  }
-  .alert.active, .success.active{
-    transform: translateY(0);
   }
   .alert i, .success i{
     margin-right: 10px;

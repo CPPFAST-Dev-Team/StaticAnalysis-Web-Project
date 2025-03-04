@@ -63,9 +63,13 @@ async function getProjects(){
 
 async function postNewScan(){
     try{
-        const response = await api.post(`/api/scan/${projectId}/`)
-        if(err?.response?.data?.message){
-            toggleNotification(err.response.data.message, 'success')
+        const formData = new FormData();
+        formData.append("project_id", projectId);
+
+        const response = await api.post(`/api/scan/${projectId}/`, formData);
+
+        if(response?.data?.message){
+            toggleNotification(response.data.message, 'success')
         }
         router.push({ name: Issues, params: { projectId: projectId} })
     }

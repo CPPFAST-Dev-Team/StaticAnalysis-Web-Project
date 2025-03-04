@@ -13,7 +13,7 @@
                 <button class="dropbtn" @click="toggleDropdown">
                     <i class="fa fa-bars"></i>
                 </button>
-                <div class="dropdown-content" v-if="showDropdown && logged">
+                <div class="dropdown-content" v-if="showDropdown && logged" @click="showDropdown=false">
                     <router-link to="/projects">Projects</router-link>
                     <router-link to="/new-project">New Project</router-link>
                     <span @click="logout">Logout</span>
