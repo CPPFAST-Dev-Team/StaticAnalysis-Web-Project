@@ -11,17 +11,20 @@
                     v-model="selectedFilters"
                     :leftColumnOptions="['High Severity', 'Medium Severity', 'Low Severity']"
                     :rightColumnOptions="['High Confidence', 'Low Confidence']"
-                    @update:model-value="filterIssues"
+                    @update:model-value="displayedIssues = paginateIssues(filterIssues(issues))"
                 />
                 <router-link :to="`/new-scan/${projectId}`" class="btn-scan">New Scan</router-link>
             </div>
         </div>
-        <div class="issue-wrapper" v-for="issue in displayedIssues">
+        <div class="issue-wrapper" v-for="issue in displayedIssues[page-1].interval">
             <component :is="issueComponent" v-bind="issue"/> <!-- dynamically assign issue component -->
         </div>
+        <!-- use key to trigger rerender of component on filtering -->
         <Pagination
-            :pages=50
+            :pages="displayedIssues.length"
+            :key="displayedIssues.length"
             @change-page="handlePageChange"
+            v-if="displayedIssues.length > 1"
         />
     </div>
     <div class="empty-container" v-else>
@@ -61,36 +64,49 @@
     library.add(fas)
 
     const route = useRoute()
-    let issues = []
     
     const projectId = route.params.projectId
     const project = ref({})
+    const issues = ref([])
     const displayedIssues = ref([])
     const selectedFilters = ref(['High Severity', 'Medium Severity', 'Low Severity', 'High Confidence', 'Low Confidence']) //selectedFilters emitted from child component FilterButton
+    const page = ref(1)
     const isMobile = ref(window.innerWidth < 768)
     const issueComponent = computed(() => isMobile.value ? Display_issue_mobile : Issue) //dynamically compute component based on isMobile, will recompute after each state change of isMobile
 
     onMounted(async () => {
-        await getIssues()
+        project.value = await getProject()
+
+        const { returnedIssues, filteredIssues } = await getIssues()
+        issues.value = returnedIssues
+        console.log(issues.value)
+        displayedIssues.value = paginateIssues(filteredIssues)
+
         window.addEventListener('resize', updateIsMobile) //add event listener to check if width is mobile
     })
     onUnmounted(() => {
         window.removeEventListener('resize', updateIsMobile) //remove event listener to check if width is mobile
     })
 
-    async function getIssues(){
+    async function getProject(){
         try{
             const projectResponse = await api.get(`api/projects/${projectId}/`)
+            return projectResponse.data
+        }
+        catch(err){
+            console.log(err)
+        }
+    }
+    async function getIssues(){
+        try{
             const issuesResponse = await api.get(`api/projects/${projectId}/vulnerabilities/`)
-
-            project.value = projectResponse.data
-
-            issues = issuesResponse.data.sort(function (issue1, issue2){
+            const returnedIssues = issuesResponse.data.sort(function (issue1, issue2){
                 const severityDifference = severityToInteger(issue2.severity) - severityToInteger(issue1.severity)
                 const confidenceDifference = parseFloat(issue2.confidence) - parseFloat(issue1.confidence)
                 return severityDifference || confidenceDifference
             })
-            filterIssues()
+            const filteredIssues = filterIssues(returnedIssues)
+            return { returnedIssues, filteredIssues }
         }
         catch(err){
             console.log(err)
@@ -110,8 +126,8 @@
             }
         }
     }
-    function filterIssues(){
-        displayedIssues.value = issues.filter(issue => {
+    function filterIssues(issues){
+        return issues.filter(issue => {
             if(issue.severity === 'SEVERE' && selectedFilters.value.includes('High Severity')){
                 return true
             }
@@ -131,11 +147,62 @@
             return false
         })
     }
+    function paginateIssues(issues){
+        const temp = []
+        for(let i=0; i<issues.length; i+=10){
+            const interval = issues.slice(i, Math.min(i+10, issues.length))
+            temp.push({
+                page: (i/10)+1,
+                interval
+            })
+        }
+        return temp
+    }
     function handlePageChange(newPage){
-        console.log(newPage)
+        page.value = newPage
     }
     function updateIsMobile(){
         isMobile.value = window.innerWidth < 768
+    }
+
+    function testPopulateIssues(){
+        let temp = []
+        for(let i=0; i<196; i++){
+            const severityNum = Math.ceil(Math.random() * 3)
+            const severity = severityNum === 1 ? 'SEVERE' : (severityNum === 2 ? 'MEDIUM' : 'LOW')
+            temp.push({
+                confidence: (Math.random()).toFixed(2).toString(),
+                file_location: "Some Location",
+                id: 1,
+                line: Math.floor(Math.random() * 3000),
+                name: "Some Issue",
+                project: 14,
+                severity,
+                summary: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Deserunt, consequuntur ullam. Neque ratione corrupti, id tempora facere illum laborum fugit dignissimos eaque numquam, culpa pariatur voluptatem error possimus voluptatibus officiis necessitatibus itaque inventore quam enim. Cumque dolore provident qui suscipit",
+                vuln_id: ""
+            })
+        }
+        const returnedIssues = temp.sort(function (issue1, issue2){
+            const severityDifference = severityToInteger(issue2.severity) - severityToInteger(issue1.severity)
+            const confidenceDifference = parseFloat(issue2.confidence) - parseFloat(issue1.confidence)
+            return severityDifference || confidenceDifference
+        })
+        const filteredIssues = filterIssues(returnedIssues)
+        return { returnedIssues, filteredIssues }
+
+        //assign int to determine hierarchy of severity category
+        function severityToInteger(severity) {
+            switch (severity) {
+                case "SEVERE":
+                    return 3;
+                case "MEDIUM":
+                    return 2;
+                case "LOW":
+                    return 1;
+                default:
+                    return 0;
+            }
+        }
     }
 </script>
 
