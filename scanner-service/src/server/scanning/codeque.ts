@@ -13,11 +13,11 @@ export class CodeQueScanner extends ScannerAdapter {
         const eslintEngine = new ESLint({ 
             cwd: target,
             baseConfig: {
-                plugins: {"@codeque": {}},
+                plugins: ["@codeque"] as unknown as Record<string, ESLint.Plugin>,
                 rules
             }
         });
-        const results = await eslintEngine.lintFiles(["*.js", "*.ts"]);
+        const results = await eslintEngine.lintFiles("*.{js,ts}");
         const translator = new EslintSarifTranslator();
         translator.initFromEslint(results, eslintEngine);
         await writeFile(resultsFile, translator.getJSON());
