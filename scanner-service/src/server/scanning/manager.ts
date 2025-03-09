@@ -1,5 +1,5 @@
 import { ScannerAdapter } from "./adapter";
-import { mkdtemp, rmdir } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import { spawn } from "node:child_process";
@@ -37,7 +37,7 @@ export class ScanAggregationManager {
     
             return finalFile;   
         } finally {
-            await rmdir(runDirectory);
+            await rm(runDirectory, { recursive: true, force: true });
         }
     }
 
