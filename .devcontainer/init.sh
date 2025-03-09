@@ -1,3 +1,3 @@
-pip install --user -r /workspace/backend/requirements.txt
+pip install --user -r /workspaces/backend/requirements.txt
 nvm install --lts
-cd /workscape/frontend && npm install
+cd /workspaces/frontend && npm install
