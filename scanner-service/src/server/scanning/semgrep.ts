@@ -13,7 +13,7 @@ export class SemGrepScanner extends ScannerAdapter {
     protected async runScan(target: string, resultsFile: string): Promise<void> {
         try {
             await execAsync(
-                `semgrep scan --config \"p/cwe-top-25\" ${target} --sarif --json-output=${resultsFile}`
+                `semgrep scan --config \"p/cwe-top-25\" ${target} --sarif -o ${resultsFile}`
             );
             if (!existsSync(resultsFile)) {
                 throw new TypeError("Results file not found");
