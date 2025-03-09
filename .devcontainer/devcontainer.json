@@ -1,9 +1,9 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/postgres
 {
-	"name": "TRPC Server",
+	"name": "Static Analysis Dev Environment",
 	"dockerComposeFile": "../docker-compose.yml",
-	"service": "scanner",
+	"service": "app",
 	"workspaceFolder": "/workspaces",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -11,15 +11,14 @@
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or the host.
-	"forwardPorts": [6000],
+	"forwardPorts": [8000, 3000, 6000],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "pip install --user -r requirements.txt",
+	"postCreateCommand": "bash .devcontainer/init.sh",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "developer",
-	"containerUser": "developer"
+	"remoteUser": "developer"
 }

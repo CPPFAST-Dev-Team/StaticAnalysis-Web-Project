@@ -1,10 +1,13 @@
 version: '3.8'
-
+name: static_analysis_project_devcontainer
 services:
-  backend:
+  app:
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
+    container_name: static_analysis_app_env
+
+    userns_mode: keep-id
 
     volumes:
       - ..:/workspaces:cached
@@ -25,23 +28,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_HOST: db
 
-  frontend:
-    image: mcr.microsoft.com/devcontainers/javascript-node:18
-    volumes:
-      - ..:/workspaces:cached
-    command: sleep infinity
-
-  scanner:
-    build:
-      context: ..
-      dockerfile: .devcontainer/scanner-service/Dockerfile
-    volumes:
-      - ..:/workspaces:cached
-    command: sleep infinity
-    userns_mode: keep-id
-
   db:
     image: postgres:latest
+    container_name: static_analysis_db_env
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
