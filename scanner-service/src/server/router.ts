@@ -1,3 +1,4 @@
+import { rm } from 'node:fs/promises';
 import { router, publicProcedure } from "./trpc";
 import { initScanSchema, ScanSchemaType } from "./schemas";
 import { StorageAdapter } from "./storage/adapter";
@@ -7,6 +8,7 @@ import { ScanAggregationManager } from "./scanning/manager";
 import { CodeQueScanner } from "./scanning/codeque";
 import { readJSONFile } from "./utils/file-system";
 import { SemGrepScanner } from "./scanning/semgrep";
+import { dirname } from 'node:path';
 
 function getStorageBackend(storageType: ScanSchemaType): StorageAdapter<unknown> {
     switch (storageType) {
@@ -28,10 +30,11 @@ async function runScans(targetDirectory: string): Promise<object> {
     ]);
     try {
         const resultsFile = await manager.runScanners(targetDirectory);
-        const resultsObject = await readJSONFile(resultsFile);    
+        const resultsObject = await readJSONFile(resultsFile);
+        await rm(dirname(resultsFile), { recursive: true, force: true });
         return resultsObject;
     } catch (error) {
-        console.error("Failed to complete scanning process");
+        console.error("Failed to complete scanning process: ", error);
         throw new Error("Backend scanning failure");
     }
 }

@@ -1,5 +1,5 @@
 import { ScannerAdapter } from "./adapter";
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, cp } from 'node:fs/promises';
 import { join } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import { spawn } from "node:child_process";
@@ -31,7 +31,12 @@ export class ScanAggregationManager {
 
         try {
             for (const scanner of this.#scanTypes) {
-                await scanner.scan(target, { resultsDirectory: runDirectory })
+                try {
+                    await scanner.scan(target, { resultsDirectory: runDirectory });
+                } catch (error) {
+                    console.warn(`${scanner.constructor.name} failure:`, error);
+                    continue;
+                }
             }
             const finalFile = await this.#mergeFiles(runDirectory);
     
@@ -50,7 +55,11 @@ export class ScanAggregationManager {
     async #mergeFiles(runDirectory: string): Promise<string> {
         const finalFile = `${uuidv4()}.sarif`;
         await this.#executeMergeUtility(runDirectory, finalFile);
-        return join(runDirectory, finalFile);
+        const sourceFile = join(runDirectory, finalFile);
+        const finalFileDirectory = await mkdtemp(`result-${this.#runCounter}`);
+        const targetFile = join(finalFileDirectory, finalFile);
+        await cp(sourceFile, targetFile);
+        return targetFile;
     }
 
     /**

@@ -14,7 +14,7 @@ export class CodeQueScanner extends ScannerAdapter {
             cwd: target,
             baseConfig: {
                 plugins: ["@codeque"] as unknown as Record<string, ESLint.Plugin>,
-                rules
+                rules,
             }
         });
         const results = await eslintEngine.lintFiles("*.{js,ts}");
