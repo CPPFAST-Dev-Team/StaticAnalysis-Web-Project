@@ -1,5 +1,5 @@
 import { ScannerAdapter } from "./adapter";
-import { mkdtemp } from 'node:fs/promises';
+import { mkdtemp, rmdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import { spawn } from "node:child_process";
@@ -29,12 +29,16 @@ export class ScanAggregationManager {
     public async runScanners(target: string): Promise<string> {
         const runDirectory = await mkdtemp(`scan-${this.#runCounter}`);
 
-        for (const scanner of this.#scanTypes) {
-            await scanner.scan(target, { resultsDirectory: runDirectory })
+        try {
+            for (const scanner of this.#scanTypes) {
+                await scanner.scan(target, { resultsDirectory: runDirectory })
+            }
+            const finalFile = await this.#mergeFiles(runDirectory);
+    
+            return finalFile;   
+        } finally {
+            await rmdir(runDirectory);
         }
-        const finalFile = await this.#mergeFiles(runDirectory);
-
-        return finalFile;
     }
 
     /**
@@ -62,8 +66,11 @@ export class ScanAggregationManager {
             try {
                 const utilityProcess = spawn(
                     multitoolPath, 
-                    [join(runDirectory, "*.sarif"), `--output-directory=${runDirectory}`, `--output-file=${outputFile}`]
+                    ["merge", join(runDirectory, "*.sarif"), `--output-directory=${runDirectory}`, `--output-file=${outputFile}`]
                 );
+                utilityProcess.stderr.on("data", (data) => {
+                    console.info("[MERGE]", data.toString());
+                });
                 utilityProcess.on("close", (code) => {
                     if (code !== 0) {
                         reject(`Merge utility returned non-zero exit code: ${code}`);
