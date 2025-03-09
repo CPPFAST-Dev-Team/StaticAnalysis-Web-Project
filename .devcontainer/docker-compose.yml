@@ -7,8 +7,6 @@ services:
       dockerfile: .devcontainer/Dockerfile
     container_name: static_analysis_app_env
 
-    # userns_mode: keep-id:uid=2000,gid=2000
-
     volumes:
       - ..:/workspaces:cached
       - run-postgresql:/var/run/postgresql
