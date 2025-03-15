@@ -2,7 +2,7 @@
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
-    <div class="input-container">
+    <form class="container" @submit.prevent>
         <div class="header">
             <h1>New Project</h1>
         </div>
@@ -20,18 +20,17 @@
             <textarea type="text" id="description" v-model="descriptionInput">
             </textarea>
         </div>
-
-
         <div class="create">
+            <Loading v-if="loading"/>
             <button class="createbtn" @click="createProject">
-                <span>Create</span>
+                Create
             </button>
         </div>
-        
-    </div>
+    </form>
 </template>
 
 <script setup>
+import Loading from "../components/Loading.vue";
 import Dropdown from "../components/Dropdown.vue";
 import api from "../api"
 
@@ -42,6 +41,7 @@ import { useRouter } from 'vue-router'
 const nameInput = ref('')
 const repoInput = ref('')
 const descriptionInput = ref('')
+const loading = ref(false)
 
 const router = useRouter();
 const toggleNotification = inject('toggleNotification')
@@ -57,20 +57,22 @@ async function createProject(){
         toggleNotification('Please provide a project description', 'alert')
     }
     else{
-        try{ //catch any errors returned from backend
-
+        loading.value = true
+        try{
             const formData = {
                 name: nameInput.value,
                 repository_url: repoInput.value,
                 description: descriptionInput.value,
             }
-
-            const response = await api.post("api/projects/", formData)
+            await api.post("api/projects/", formData)
             toggleNotification(`Project ${nameInput.value} successfully created`, 'success')
             router.push('/projects')
         }
-        catch (error){
+        catch(error){
             console.log(error)
+        }
+        finally{
+            loading.value = false
         }
     }
 }
@@ -89,11 +91,12 @@ function isValidURL(url) {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
-.input-container {
+.container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    row-gap: 15px;
     min-width: 300px;
     padding: 20px;
     font-family: 'DM Sans', sans-serif;
@@ -107,10 +110,8 @@ function isValidURL(url) {
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-    height: 10%;
     max-width: 500px;
     min-height: 50px;
-    margin-bottom: 20px;
 }
 .header h1{
     color:#063970;
@@ -123,7 +124,6 @@ function isValidURL(url) {
     justify-content: center;
     width: 100%;
     max-width: 500px;
-    margin-bottom: 15px;
 }
 
 .input-group input[type="text"] {
@@ -160,6 +160,7 @@ function isValidURL(url) {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    row-gap: 15px;
     width: 100%;
     height: 12%;
     max-width: 500px;

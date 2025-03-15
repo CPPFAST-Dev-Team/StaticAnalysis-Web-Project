@@ -2,12 +2,11 @@
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
-    <div class="input-container">
+    <form class="input-container" @submit.prevent v-if="isMounted">
         <div class="header">
             <h1>New Scan of {{ projectName }} </h1>
         </div>
-
-        <form class="input-group">
+        <div class="input-group">
             <label for="branch">Branch</label>
             <Dropdown
                 id="branch"
@@ -15,40 +14,58 @@
                 :options="branches"
                 v-model="selectedBranch"
             />
-        </form>
+        </div>
 
-        <form class="input-group">
+        <div class="input-group">
             <label for="commit">Commit</label>
             <input type="text" id="commit" v-model="commitInput">
-        </form>
+        </div>
 
         <div class="create">
+            <Loading v-if="loading"/>
             <button @click="postNewScan" class="createbtn">
                 <text>Initiate</text>
             </button>
         </div>
-        
+    </form>
+    <div class="input-container" v-if="!isMounted">
+        <Loading />
     </div>
 </template>
 
 <script setup>
 import Dropdown from '../components/Dropdown.vue'
+import Loading from '../components/Loading.vue'
 import api from '../api'
 
-import { ref, inject } from 'vue'
+import { ref, inject, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-let projectName = ref('')
+const projectName = ref('')
 const commitInput = ref('')
 const branches = ref([])
 const selectedBranch = ref(null)
+const loading = ref(false)
+const isMounted = ref(false)
 
 const router = useRouter()
 const route = useRoute()
 const toggleNotification = inject('toggleNotification')
 const projectId = route.params.projectId
 
-getProjects()
+onMounted(async () => {
+    loading.value = true
+    try{
+        await getProjects()
+    }
+    catch(err){
+        console.log(err)
+    }
+    finally{
+        loading.value = false
+        isMounted.value = true
+    }
+})
 
 async function getProjects(){
     try{
@@ -63,6 +80,7 @@ async function getProjects(){
 
 async function postNewScan(){
     try{
+        loading.value = true
         const formData = new FormData();
         formData.append("project_id", projectId);
 
@@ -79,6 +97,9 @@ async function postNewScan(){
         }
         console.log(err)
     }
+    finally{
+        loading.value = false
+    }
 }
 
 </script>
@@ -90,11 +111,11 @@ async function postNewScan(){
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 20px;
-    padding-top: 20vh;
-    font-family: 'DM Sans', sans-serif;
+    justify-content: center;
     min-width: 300px;
+    padding: 20px;
+    row-gap: 15px;
+    font-family: 'DM Sans', sans-serif;
     width: 100%;
     height: 100%;
 }
@@ -108,7 +129,6 @@ async function postNewScan(){
     min-width: 250px;
     max-width: 500px;
     min-height: 50px;
-    margin-bottom: 20px;
 }
 .header h1, .header h3{
     color:#063970;
@@ -124,7 +144,6 @@ async function postNewScan(){
     height: 50px;
     min-width: 250px;
     max-width: 500px;
-    margin-bottom: 15px;
 }
 
 .input-group input[type="text"] {
@@ -149,6 +168,7 @@ async function postNewScan(){
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    row-gap: 15px;
     width: 100%;
     height: 12%;
     min-width: 250px;

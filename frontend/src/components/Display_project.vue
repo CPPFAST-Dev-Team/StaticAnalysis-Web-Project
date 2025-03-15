@@ -93,11 +93,9 @@
  </script>
  
  
- <style scoped>
- @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
- 
- 
- .box {
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+.box {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -110,18 +108,13 @@
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
 }
- 
- 
- .left, .center, .right, .innerBox, h2, h3, button, a {
+.left, .center, .right, .innerBox, h2, h3, button, a {
   font-family: 'DM Sans', sans-serif;
- }
-
- h2, h3{
+}
+h2, h3 {
   color: black;
- }
- 
- 
- .innerBox {
+}
+.innerBox {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -132,10 +125,8 @@
   border: 1px solid #063970;
   padding: 10px;
   border-radius: 20px;
- }
- 
- 
- .left {
+}
+.left {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -144,10 +135,8 @@
   border: 1px solid transparent;
   border-radius: 15px;
   padding: 16px;
- }
- 
- 
- .center {
+}
+.center {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,10 +146,8 @@
   padding: 5px;
   border: 1px solid transparent;
   border-radius: 15px;
- }
- 
- 
- .right {
+}
+.right {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -171,27 +158,22 @@
   padding: 5px;
   border: 1px solid transparent;
   border-radius: 15px;
- }
- 
- 
- img {
+}
+img {
   display: block;
   width: 3rem;
   height: auto;
- }
- 
- 
- .btn-group {
+}
+
+.btn-group {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   height: 50%;
   width: 100%;
- }
- 
- 
- .btn-group button, .btn-group a {
+}
+.btn-group button, .btn-group a {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -201,35 +183,26 @@
   border: 1px solid black;
   cursor: pointer;
   margin-right: 10px;
- }
- 
- 
- .btn-red {
+}
+
+.btn-red {
   background-color: #E51400;
   color: white;
- }
- 
- 
- .btn-yellow {
+}
+.btn-yellow {
   background-color: #FFFF66;
   color: black;
- }
- 
- 
- .btn-blue {
+}
+.btn-blue {
   background-color: #063970;
   color: white;
- }
- 
- 
- .btn-group:after {
+}
+.btn-group:after {
   content: "";
   clear: both;
   display: table;
- }
- 
- 
- .btn-view, .btn-delete {
+}
+.btn-view, .btn-delete {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,44 +212,34 @@
   width: 80%;
   border-radius: 10px;
   cursor: pointer;
- }
+}
 .btn-delete {
   background-color: #E51400;
   border: 1px solid gray;
 }
- 
- 
- .btn-group button:hover, .btn-group a:hover, .btn-view:hover, .btn-delete:hover {
+.btn-group button:hover, .btn-group a:hover, .btn-view:hover, .btn-delete:hover {
   opacity: 0.8;
- }
+}
 
- a h2:hover{
+a h2:hover {
   text-decoration: underline;
- }
- 
- 
- h2 {
+}
+h2 {
   font-size: 20px;
   margin: 10px;
   word-break: break-word;
- }
- @media(max-width: 768px){
-  h2{
+}
+@media(max-width: 768px) {
+  h2 {
     font-size: 0.5rem;
   }
- }
-
-
-  h3 {
+}
+h3 {
   font-size: clamp(1rem, 2%, 1rem);
   margin: 10px;
- }
-
-
-  text {
-    font-size: clamp(0.8rem, 1%, 1rem);
-  }
- 
- 
- </style>
+}
+text {
+  font-size: clamp(0.8rem, 1%, 1rem);
+}
+</style>
  

@@ -92,8 +92,7 @@
     function handleFilterSubmit(){
         showFilter.value = false
         emit('update:modelValue', selectedOptions.value);
-        //logic here to filter...
-        console.log(selectedOptions.value)
+        //emit to parent to update parent value from child component's selectedOptions
     }
 
     function updateIsSmallScreen(){

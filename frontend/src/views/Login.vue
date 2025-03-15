@@ -2,7 +2,7 @@
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
-    <div class="input-container"> 
+    <form class="container" v-if="!loading"> 
         <div class="icon-login">
             <i class="fa fa-user-o" aria-hidden="true"></i>
         </div>
@@ -20,17 +20,21 @@
             <a class="loginbtn" @click="submitLogin">Login</a>
             <a class="registerbtn" @click="submitRegister">Register</a>
         </div>
-        
+    </form>
+    <div v-if="loading" class="container">
+        <Loading/>
     </div>
 </template>
 
 <script setup>
+    import Loading from "../components/Loading.vue";
     import { ref, reactive, inject } from 'vue'
     import { useRouter } from 'vue-router'
     import axios from 'axios'
 
     const username = ref('')
     const password = ref('')
+    const loading = ref(false)
     const toggleNotification = inject('toggleNotification')
 
     const router = useRouter();
@@ -43,6 +47,7 @@
             toggleNotification('Please provide a password', "alert") //Check for password input
         }
         else{
+            loading.value = true
             try{ //catch any errors returned from backend
                 axios.defaults.headers.common["Authorization"] = "" //remove access token from header if there is one
 
@@ -69,6 +74,9 @@
                 console.log(error)
                 error?.response?.data?.error ? toggleNotification('Invalid credentials', 'alert'): toggleNotification('Something went wrong. Please try again', 'alert')
             }
+            finally{
+                loading.value = false
+            }
         }
     }
     async function submitRegister(){
@@ -79,6 +87,7 @@
             toggleNotification('Please provide a password', "alert") //Check for password input
         }
         else{
+            loading.value = true
             const formData = {
                 username: username.value,
                 password: password.value
@@ -97,19 +106,22 @@
                     toggleNotification('Something went wrong. Please try again', 'alert')
                 }
             }
+            finally{
+                loading.value = false
+            }
         }
     }
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
-    .input-container{
+    .container{
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         padding: 20px;
-        padding-top: 20vh;
+        padding-bottom: 10vh;
         font-family: 'DM Sans', sans-serif;
         min-width: 300px;
         width: 100%;
@@ -125,7 +137,6 @@
         flex-direction: column;
         align-items: flex-start;
         justify-content: center;
-        margin-bottom: 15px;
     }
     .input-group input{
         height: 100%;
@@ -147,7 +158,6 @@
         justify-content: center;
         height: 20%;
         width: 20%;
-        margin-bottom: 20px;
     }
     .icon-login i{
         color:#063970;
@@ -172,7 +182,6 @@
         width: 80%;
         height: 30%;
         min-width: 200px;
-        margin-bottom: 10px;
     }
     .loginbtn{
         background-color:#063970;
