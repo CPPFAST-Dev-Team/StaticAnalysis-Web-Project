@@ -1,0 +1,29 @@
+ARG NODE_VERSION=22.10.0
+ARG PYTHON_VERSION=3.10
+
+FROM docker.io/library/node:${NODE_VERSION}-alpine AS frontend
+
+RUN mkdir /app
+WORKDIR /app
+COPY frontend/ /app
+RUN npm install && npm run build
+
+FROM docker.io/library/python:${PYTHON_VERSION}-alpine as backend
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+RUN python -m venv .venv
+ENV VIRTUAL_ENV=/usr/src/app/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+COPY backend/requirements.txt /usr/src/app
+RUN pip install -r requirements.txt
+
+FROM docker.io/library/python:${PYTHON_VERSION}-alpine as app
+
+COPY --from=backend /usr/src/app/.venv /usr/src/app/.venv
+COPY backend /usr/src/app
+ENV VIRTUAL_ENV=/usr/src/app/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+WORKDIR /usr/src/app
+
+CMD ["python", "server.wsgi:application"]
