@@ -21,9 +21,10 @@ RUN pip install -r requirements.txt
 FROM docker.io/library/python:${PYTHON_VERSION}-alpine as app
 
 COPY --from=backend /usr/src/app/.venv /usr/src/app/.venv
+COPY --from=frontend /app/dist /usr/src/app/static
 COPY backend /usr/src/app
 ENV VIRTUAL_ENV=/usr/src/app/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 WORKDIR /usr/src/app
 
-CMD ["python", "server.wsgi:application"]
+CMD ["gunicorn", "server.wsgi:application"]
