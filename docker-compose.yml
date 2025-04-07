@@ -1,0 +1,37 @@
+services:
+  webapp:
+    build:
+      dockerfile: Dockerfile.webapp
+      context: .
+    ports:
+      - "${WEB_APP_PORT:-8000}:8000"
+    environment:
+      POSTGRES_DB: "${WEB_APP_DB:-scanner_app}"
+      POSTGRES_USER: "${WEB_APP_DB_USER:-scanner_app_user}"
+      POSTGRES_PASSWORD: "${WEB_APP_DB_PASSWORD}"
+      POSTGRES_HOST: "database"
+    volumes:
+      - scan-samples:/usr/src/app/samples
+  scanner:
+    build:
+      dockerfile: Dockerfile.scanner
+      context: .
+    expose:
+      - "${SCANNER_SERVICE_PORT:-4111}"
+    environment:
+      SCANNER_SERVICE_PORT: "${SCANNER_SERVICE_PORT:-4111}"
+    volumes:
+      - scan-samples:/scanner/samples
+  database:
+    image: docker.io/library/postgres:17-alpine
+    environment:
+      POSTGRES_DB: "${WEB_APP_DB:-scanner_app}"
+      POSTGRES_USER: "${WEB_APP_DB_USER:-scanner_app_user}"
+      POSTGRES_PASSWORD: "${WEB_APP_DB_PASSWORD}"
+    expose:
+      - "5432"
+    volumes:
+      - database-data:/var/lib/postgresql/data
+volumes:
+  scan-samples:
+  database-data:

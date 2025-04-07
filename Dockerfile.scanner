@@ -23,6 +23,6 @@ COPY --from=node /app/dist /scanner
 
 WORKDIR /scanner
 COPY scanner-service/entry.sh entry.sh
-RUN chmod +x entry.sh
+RUN chmod +x entry.sh && mkdir samples
 
 ENTRYPOINT [ "/scanner/entry.sh" ]
