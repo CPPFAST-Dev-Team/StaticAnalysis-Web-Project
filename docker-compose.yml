@@ -12,6 +12,9 @@ services:
       POSTGRES_HOST: "database"
     volumes:
       - scan-samples:/usr/src/app/samples
+    depends_on:
+      - database
+      - scanner
   scanner:
     build:
       dockerfile: Dockerfile.scanner
