@@ -1,0 +1,203 @@
+<template>
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <form class="container" v-if="!loading"> 
+        <div class="icon-login">
+            <i class="fa fa-user-o" aria-hidden="true"></i>
+        </div>
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" v-model="username"><br><br>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" v-model="password"><br><br>
+        </div>
+
+        <div class="btn-group-login">
+            <a class="loginbtn" @click="submitLogin">Login</a>
+            <a class="registerbtn" @click="submitRegister">Register</a>
+        </div>
+    </form>
+    <div v-if="loading" class="container">
+        <Loading/>
+    </div>
+</template>
+
+<script setup>
+    import Loading from "../components/Loading.vue";
+    import { ref, reactive, inject } from 'vue'
+    import { useRouter } from 'vue-router'
+    import axios from 'axios'
+
+    const username = ref('')
+    const password = ref('')
+    const loading = ref(false)
+    const toggleNotification = inject('toggleNotification')
+
+    const router = useRouter();
+
+    async function submitLogin (){
+        if(username.value === ''){
+            toggleNotification('Please provide a username', "alert") //Check for username input
+        }
+        else if(password.value === ''){
+            toggleNotification('Please provide a password', "alert") //Check for password input
+        }
+        else{
+            loading.value = true
+            try{ //catch any errors returned from backend
+                axios.defaults.headers.common["Authorization"] = "" //remove access token from header if there is one
+
+                localStorage.removeItem("access") //remove existing tokens
+                localStorage.removeItem("refresh")
+
+                const formData = {
+                    username: username.value,
+                    password: password.value
+                }
+
+                const response = await axios.post("api/auth/login/", formData) //send post request and retrieve JWT tokens from response
+
+                const access = response.data.access
+                const refresh = response.data.refresh
+
+                axios.defaults.headers.common["Authorization"] = `Bearer ${access}` //add access token to axios header
+                localStorage.setItem("access", access)
+                localStorage.setItem('refresh', refresh)
+
+                router.push('/projects')
+            }
+            catch (error){
+                console.log(error)
+                error?.response?.data?.error ? toggleNotification('Invalid credentials', 'alert'): toggleNotification('Something went wrong. Please try again', 'alert')
+            }
+            finally{
+                loading.value = false
+            }
+        }
+    }
+    async function submitRegister(){
+        if(username.value === ''){
+            toggleNotification('Please provide a username', "alert") //Check for username input
+        }
+        else if(password.value === ''){
+            toggleNotification('Please provide a password', "alert") //Check for password input
+        }
+        else{
+            loading.value = true
+            const formData = {
+                username: username.value,
+                password: password.value
+            }
+            
+            try{
+                const response = await axios.post('api/auth/register/', formData) //send post request to create user in backend
+                let message = "Account created, please login with same credentials."
+                toggleNotification(message, "success")
+            } 
+            catch(err){
+                if(err?.response?.data?.username){
+                    toggleNotification('Username is already taken. Please provide a different one', 'alert')
+                }
+                else{
+                    toggleNotification('Something went wrong. Please try again', 'alert')
+                }
+            }
+            finally{
+                loading.value = false
+            }
+        }
+    }
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+    .container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        padding-bottom: 10vh;
+        font-family: 'DM Sans', sans-serif;
+        min-width: 300px;
+        width: 100%;
+        height: 100%;
+    }
+    .input-group{
+        width: 90%;
+        height: 8%;
+        min-width: 250px;
+        max-width: 500px;
+        min-height: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    .input-group input{
+        height: 100%;
+        width: 100%;
+        min-height: 30px;
+        border: 1px solid #063970;
+        border-radius: 5px;
+        color: #063970;
+        margin: 0;
+    }
+    .input-group label{
+        margin: 0;
+        font-family: 'DM Sans', sans-serif;
+        font-size: clamp(1rem, 50%, 2rem);
+    }
+    .icon-login{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 20%;
+        width: 20%;
+    }
+    .icon-login i{
+        color:#063970;
+        font-size: 5em;
+    }
+    .btn-group-login{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+        width: 40%;
+        height: 12%;
+        min-width: 250px;
+        max-width: 500px;
+        min-height: 100px;
+    }
+    .loginbtn, .registerbtn{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 80%;
+        height: 30%;
+        min-width: 200px;
+    }
+    .loginbtn{
+        background-color:#063970;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    .registerbtn{
+        background-color: white;
+        color:#063970;
+        border: 1px solid #063970;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    text{
+        text-decoration: none;
+    }
+
+</style>

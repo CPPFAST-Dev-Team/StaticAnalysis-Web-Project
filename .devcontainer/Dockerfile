@@ -15,15 +15,14 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-=======
+
 # [Optional] If your requirements rarely change, uncomment this section to add them to the image.
 # COPY requirements.txt /tmp/pip-tmp/
 # RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
 #    && rm -rf /tmp/pip-tmp
 
 # [Optional] Uncomment this section to install additional OS packages.
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends postgresql-client 
 
-
-
+RUN mkdir /.nvm
+ENV NVM_DIR /.nvm
+RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
