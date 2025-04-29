@@ -1,5 +1,4 @@
 from django.db import models
-from projects.models import Project
 
 class AnalysisResult(models.Model):
     """
@@ -15,7 +14,7 @@ class AnalysisResult(models.Model):
     :param result: The SARIF JSON result returned from the scanner.
     :type result: dict or None
     """
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="analysis_results")
+    project = models.ForeignKey("projects.Project", on_delete=models.CASCADE, related_name="analysis_results")
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=20,

@@ -1,8 +1,16 @@
-from django.shortcuts import render
+import typing
+
+from django.apps import apps
 from django.http import JsonResponse
 from django.views import View
 from django.shortcuts import get_object_or_404
-from projects.models import Project
+
+if typing.TYPE_CHECKING:
+    from projects.models import Project
+
+
+ProjectModel: typing.Type["Project"] = apps.get_model("projects", "Project")
+
 
 class InitiateAnalysisView(View):
     """
@@ -27,7 +35,7 @@ class InitiateAnalysisView(View):
         :return: Response indicating the analysis initiation status
         :rtype: django.http.JsonResponse
         """
-        project = get_object_or_404(Project, pk=pk)
+        project = get_object_or_404(ProjectModel, pk=pk)
         # Logic to initiate analysis for the project
         return JsonResponse({'message': f'Analysis initiated for project ID {pk}'}, status=200)
 
@@ -54,7 +62,7 @@ class RetrieveAnalysisResultsView(View):
         :return: Response containing the analysis results or an error message
         :rtype: django.http.JsonResponse
         """
-        project = get_object_or_404(Project, pk=pk)
+        project = get_object_or_404(ProjectModel, pk=pk)
         # Logic to retrieve analysis results for the project
         results = {'results': f'Here are the results for project ID {pk}'}
         return JsonResponse(results, status=200)

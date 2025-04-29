@@ -15,11 +15,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
 
 from .models import Project, Vulnerability
-from .serializers import ProjectSerializer
-from static_analysis.serializers import AnalysisResultSerializer
+from . import serializers
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +33,7 @@ class ProjectListCreateView(generics.ListCreateAPIView):
     :cvar permission_classes: List of permission classes required.
     """
     queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
+    serializer_class = serializers.ProjectSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -105,7 +103,7 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     :cvar permission_classes: List of permission classes required.
     """
     queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
+    serializer_class = serializers.ProjectSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -186,7 +184,7 @@ class UserProjectListView(generics.ListAPIView):
 
     :cvar serializer_class: Serializer class for project objects.
     """
-    serializer_class = ProjectSerializer
+    serializer_class = serializers.ProjectSerializer
 
     def get_queryset(self):
         """
@@ -209,7 +207,7 @@ class ProjectUserAddView(generics.UpdateAPIView):
     :cvar serializer_class: Serializer class for project objects.
     """
     queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
+    serializer_class = serializers.ProjectSerializer
 
     def update(self, request, *args, **kwargs):
         """
@@ -316,7 +314,7 @@ class ProjectVulnerabilitiesListView(generics.ListAPIView):
 
     This is used to easily present severity levels in the frontend.
     """
-    serializer_class = VulnerabilitySerializer
+    serializer_class = serializers.VulnerabilitySerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -330,23 +328,6 @@ class ProjectVulnerabilitiesListView(generics.ListAPIView):
         """
         project_id = self.kwargs.get('project_id')
         return Vulnerability.objects.filter(project_id=project_id)
-
-# Ensure VulnerabilitySerializer is imported and set in the view.
-from .serializers import ProjectSerializer
-from projects.models import Vulnerability
-from rest_framework import serializers
-
-class VulnerabilitySerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Vulnerability model.
-
-    This serializer handles conversion between Vulnerability instances and JSON.
-    """
-    class Meta:
-        model = Vulnerability
-        fields = '__all__'
-
-ProjectVulnerabilitiesListView.serializer_class = VulnerabilitySerializer
 
 
 class LogoutView(generics.GenericAPIView):
