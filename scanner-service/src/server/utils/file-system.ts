@@ -46,3 +46,13 @@ export async function readJSONFile<O = object>(filePath: string): Promise<O> {
     const fileContent = await readFile(filePath, "utf-8");
     return JSON.parse(fileContent);
 }
+
+/**
+ * Simple helper function which retrieves a path to a file share location, to be
+ * used for retrieving files from a folder/directory shared with other processes.
+ *
+ * @returns The location.
+ */
+export function getFileSharingLocation(): string {
+    return String(process.env.FILE_SHARE_LOCATION || "/tmp");
+}

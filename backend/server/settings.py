@@ -158,3 +158,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SCANNER_FILES_PATH = os.environ.get("SCAN_TARGET_FILES_PATH", "/tmp")
+SCANNER_HOST = os.environ.get("SCAN_TOOL_HOST", "localhost")
+SCANNER_PORT = os.environ.get("SCAN_TOOL_PORT", "4111")

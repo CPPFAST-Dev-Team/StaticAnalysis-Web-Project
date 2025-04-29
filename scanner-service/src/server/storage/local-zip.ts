@@ -1,6 +1,7 @@
 import AdmZip from "adm-zip";
+import { basename, join } from "node:path";
 import { StorageAdapter } from "./adapter";
-import { extractFilesTo } from "../utils/file-system";
+import { extractFilesTo, getFileSharingLocation } from "../utils/file-system";
 
 
 /**
@@ -8,7 +9,9 @@ import { extractFilesTo } from "../utils/file-system";
  */
 export class LocalZipStorage extends StorageAdapter {
     protected async downloadFiles(id: string, directory: string): Promise<void> {
-        const archive = new AdmZip(id);
+        const fileName = basename(id);
+        const fullPath = join(getFileSharingLocation(), fileName);
+        const archive = new AdmZip(fullPath);
         await extractFilesTo(archive, directory);
     }
 }

@@ -10,8 +10,10 @@ services:
       POSTGRES_USER: "${WEB_APP_DB_USER:-scanner_app_user}"
       POSTGRES_PASSWORD: "${WEB_APP_DB_PASSWORD}"
       POSTGRES_HOST: "database"
+      SCAN_TOOL_HOST: "scanner"
+      SCAN_TOOL_PORT: "${SCANNER_SERVICE_PORT:-4111}"
     volumes:
-      - scan-samples:/usr/src/app/samples
+      - scan-files:/tmp
     depends_on:
       - database
       - scanner
@@ -24,7 +26,7 @@ services:
     environment:
       SCANNER_SERVICE_PORT: "${SCANNER_SERVICE_PORT:-4111}"
     volumes:
-      - scan-samples:/scanner/samples
+      - scan-files:/tmp
   database:
     image: docker.io/library/postgres:17-alpine
     environment:
