@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth.models import User
-from projects.models import Project
+from .models import Project
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class SimpleTestCase(TestCase):

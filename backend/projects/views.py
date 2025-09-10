@@ -18,8 +18,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
 from .models import Project, Vulnerability
-from .serializers import ProjectSerializer
-from static_analysis.serializers import AnalysisResultSerializer
+from .serializers import ProjectSerializer, VulnerabilitySerializer
+from analysis.serializers import AnalysisResultSerializer
 
 logger = logging.getLogger(__name__)
 

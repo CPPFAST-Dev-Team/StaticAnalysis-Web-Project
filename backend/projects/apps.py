@@ -1,6 +1,5 @@
 from django.apps import AppConfig
 
-
-class StaticAnalysisConfig(AppConfig):
+class ProjectsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "static_analysis"
+    name = "projects"
