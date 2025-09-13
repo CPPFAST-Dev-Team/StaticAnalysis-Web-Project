@@ -2,31 +2,35 @@
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
-    <form class="container" v-if="!loading"> 
-        <div class="icon-login">
-            <i class="fa fa-user-o" aria-hidden="true"></i>
+    <section class="container">
+        <form v-if="!loading" @submit.prevent> 
+            <div class="icon-login">
+                <i class="fa fa-user-o" aria-hidden="true"></i>
+            </div>
+            <div class="input-group">
+                <div>
+                    <label>Username</label>
+                    <input type="text" v-model="username">
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="password" v-model="password">
+                </div>
+            </div>
+            <div class="btn-group-login">
+                <button class="loginbtn" @click="submitLogin">Login</button>
+                <button class="registerbtn" @click="submitRegister">Register</button>
+                <GithubLogin />
+            </div>
+        </form>
+        <div v-if="loading" class="container">
+            <Loading/>
         </div>
-        <div class="input-group">
-            <label>Username</label>
-            <input type="text" v-model="username"><br><br>
-        </div>
-
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" v-model="password"><br><br>
-        </div>
-
-        <div class="btn-group-login">
-            <a class="loginbtn" @click="submitLogin">Login</a>
-            <a class="registerbtn" @click="submitRegister">Register</a>
-        </div>
-    </form>
-    <div v-if="loading" class="container">
-        <Loading/>
-    </div>
+    </section>
 </template>
 
 <script setup>
+    import GithubLogin from "@/components/GithubLogin.vue";
     import Loading from "../components/Loading.vue";
     import { ref, reactive, inject } from 'vue'
     import { useRouter } from 'vue-router'
@@ -114,86 +118,87 @@
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
-    .container{
+    section{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 80px);
+        width: 100%;
+    }
+    form{
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         padding: 20px;
-        padding-bottom: 10vh;
+        row-gap: 30px;
         font-family: 'DM Sans', sans-serif;
         min-width: 300px;
         width: 100%;
-        height: 100%;
+        max-width: 1024px;
     }
     .input-group{
-        width: 90%;
-        height: 8%;
-        min-width: 250px;
-        max-width: 500px;
-        min-height: 50px;
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
         justify-content: center;
+        align-items: flex-start;
+        row-gap: 10px;
+        width: 40%;
+        min-width: 300px;
+    }
+    .input-group div{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
     .input-group input{
-        height: 100%;
         width: 100%;
-        min-height: 30px;
         border: 1px solid #063970;
         border-radius: 5px;
         color: #063970;
-        margin: 0;
+        padding: 5px;
     }
     .input-group label{
         margin: 0;
         font-family: 'DM Sans', sans-serif;
-        font-size: clamp(1rem, 50%, 2rem);
+        font-size: 1.2rem;
     }
     .icon-login{
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 20%;
-        width: 20%;
     }
     .icon-login i{
         color:#063970;
-        font-size: 5em;
+        font-size: 8em;
     }
     .btn-group-login{
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: space-evenly;
+        align-items: center;
         width: 40%;
-        height: 12%;
-        min-width: 250px;
-        max-width: 500px;
-        min-height: 100px;
+        min-width: 300px;
+        row-gap: 10px;
     }
     .loginbtn, .registerbtn{
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 5px 20px;
+        width: 100%;
         text-align: center;
-        width: 80%;
-        height: 30%;
-        min-width: 200px;
+        border-radius: 10px;
+        font-size: 1rem;
     }
     .loginbtn{
         background-color:#063970;
         color: white;
-        border-radius: 10px;
         cursor: pointer;
     }
     .registerbtn{
         background-color: white;
         color:#063970;
         border: 1px solid #063970;
-        border-radius: 10px;
         cursor: pointer;
     }
     text{

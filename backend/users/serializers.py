@@ -32,3 +32,8 @@ class UserLoginSerializer(serializers.Serializer):
     """
     username = serializers.CharField()
     password = serializers.CharField()
+
+class GithubAuthSerializer(serializers.Serializer):
+    access = serializers.CharField()
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    username = serializers.CharField()

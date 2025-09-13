@@ -1,9 +1,13 @@
+import os
+import requests
+
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, UserLoginSerializer
+from .serializers import UserSerializer, UserLoginSerializer, GithubAuthSerializer
 
 class UserRegistrationView(generics.CreateAPIView):
     """
@@ -80,3 +84,63 @@ class UserLogoutView(APIView):
         """
         request.auth.delete()
         return Response(status=status.HTTP_200_OK)
+    
+class GithubAuthAPIView(APIView):
+    """
+    Exchange GitHub OAuth 'code' for an access token, fetch the user profile,
+    create/login user, and return JWT.
+    """
+
+    def post(self, request, *args, **kwargs):
+        code = request.data.get("code")
+        if not code:
+            return Response({"error": "Code not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Step 1: Exchange the code for an access token
+        token_url = "https://github.com/login/oauth/access_token"
+        payload = {
+            "client_id": os.getenv("GITHUB_CLIENT_ID"),
+            "client_secret": os.getenv("GITHUB_SECRET_KEY"),
+            "code": code,
+            "redirect_uri": os.getenv("GITHUB_REDIRECT_URI"),
+        }
+        headers = {"Accept": "application/json"}
+
+        token_res = requests.post(token_url, data=payload, headers=headers)
+        token_data = token_res.json()
+
+        access_token = token_data.get("access_token")
+        if not access_token:
+            return Response({"error": "Failed to retrieve access token", "details": token_data},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Step 2: Use the access token to fetch GitHub profile
+        # TODO: Retrieve additional profile info if necessary
+        user_res = requests.get(
+            "https://api.github.com/user",
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        profile = user_res.json()
+
+        if "id" not in profile:
+            return Response({"error": "Failed to fetch GitHub profile", "details": profile},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        username = profile.get("login")
+
+        # Step 3: Get or create a local user
+        user, _ = User.objects.get_or_create(username=username)
+
+        # Step 4: Generate JWT
+        refresh = RefreshToken.for_user(user)
+
+        # Step 5: Serialize and respond
+        data = {
+            "access": str(refresh.access_token),
+            "user_id": user.id,
+            "username": user.username,
+        }
+        serializer = GithubAuthSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
