@@ -19,9 +19,6 @@
         </section>
         <div class="empty-container" v-if="!loading && projects.length === 0">
             <text class="empty">No Projects Yet</text>
-            <br/>
-            <FontAwesomeIcon size="5x" color="#063970" icon="fa-solid fa-face-sad-tear" />
-            <br/>
             <router-link to="/new-project" class="btn-start-project">Create First Project</router-link>
         </div>
         <div class="empty-container" v-if="loading">
@@ -179,6 +176,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        row-gap: 20px;
         height: 100%;
         width: 100%;
         max-width: 1200px;

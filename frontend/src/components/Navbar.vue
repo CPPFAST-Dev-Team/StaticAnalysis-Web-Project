@@ -4,16 +4,15 @@
     </head>
     <div class="navbar">
         <div class="left">
-            <router-link to="/"><text>Code Assessor</text></router-link>
+            <router-link to="/"><text>Code Scanner</text></router-link>
         </div>
-
-        <div class="right">
-            
+        <div class="right" v-if="username">
+            <span v-if="username">Hi {{ username }}</span>
             <div class="dropdown">
                 <button class="dropbtn" @click="toggleDropdown">
                     <i class="fa fa-bars"></i>
                 </button>
-                <div class="dropdown-content" v-if="showDropdown && logged" @click="showDropdown=false">
+                <div class="dropdown-content" v-if="showDropdown" @click="showDropdown=false">
                     <router-link to="/projects">Projects</router-link>
                     <router-link to="/new-project">New Project</router-link>
                     <span @click="logout">Logout</span>
@@ -24,19 +23,29 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
+import { storeToRefs } from 'pinia'
+
 const showDropdown = ref(false)
+
+const userStore = useUserStore()
+const { username } = storeToRefs(userStore)
+const { isAuthenticated, clearUser } = userStore
 
 const route = useRoute()
 const router = useRouter()
-const logged = computed(() => !!localStorage.getItem('access'))
+const logged = ref(isAuthenticated())
 
 function logout(){
+    logged.value = false
     showDropdown.value = false
     localStorage.removeItem('access');
     localStorage.removeItem('refresh');
 
+    // Update user store
+    clearUser()
     router.push('/')
 }
 
@@ -51,7 +60,6 @@ function toggleDropdown(){
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
-
 .navbar {
     display: flex;
     flex-direction: row;
@@ -65,7 +73,6 @@ function toggleDropdown(){
     top: 0;
     padding: 10px 0;
 }
-
 .navbar .left {
     display: flex;
     align-items: center;
@@ -73,7 +80,6 @@ function toggleDropdown(){
     width: 50%;
     margin-left: 10px;
 }
-
 .navbar .right {
     display: flex;
     align-items: center;
@@ -81,23 +87,19 @@ function toggleDropdown(){
     width: 50%;
     margin-right: 10px;
 }
-
 .dropdown {
     position: relative;
     display: inline-block;
 }
-
 .dropdown .dropbtn {
     font-size: 16px;
     border: none;
-    outline: none;
     color: #063970;
+    background-color: white;
     padding: 8px 16px;
-    background-color: inherit;
-    font-family: inherit;
     cursor: pointer;
+    outline: none;
 }
-
 .dropdown-content {
     display: block;
     position: absolute;
@@ -108,8 +110,8 @@ function toggleDropdown(){
 
     right: 0;
 }
-
 .dropdown-content a, .dropdown-content span {
+    border-bottom: 1px solid #063970;
     font-family: 'DM Sans', sans-serif;
     color: #063970;
     padding: 12px 16px;
@@ -117,12 +119,10 @@ function toggleDropdown(){
     display: block;
     text-align: left;
 }
-
 .dropdown-content a:hover, .dropdown-content span:hover {
     cursor: pointer;
     background-color: #ddd;
 }
-
 .navbar text {
     font-family: 'DM Sans', sans-serif;
     font-size: clamp(1rem, 10%, 3rem);

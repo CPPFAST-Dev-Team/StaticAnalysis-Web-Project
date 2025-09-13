@@ -77,17 +77,18 @@ router.beforeEach(async (to, from) => {
       return true;
     }
 
-    if(!isAuthenticated()){
-        const refreshed = await refreshToken();
-        console.log({'refreshed': refreshed})
-        if(refreshed){
-            return true;
-        }
-        if(!refreshed){
-            console.log("We are returning to login")
-            return {name: "Login"}
-        }
-    }
+    // TODO: Refactor to account for github auth
+    // if(!isAuthenticated()){
+    //     const refreshed = await refreshToken();
+    //     console.log({'refreshed': refreshed})
+    //     if(refreshed){
+    //         return true;
+    //     }
+    //     if(!refreshed){
+    //         console.log("We are returning to login")
+    //         return {name: "Login"}
+    //     }
+    // }
     return true;
   })
 

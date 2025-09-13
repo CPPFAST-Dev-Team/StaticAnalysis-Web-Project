@@ -1,6 +1,12 @@
 <script setup>
-    import { onMounted } from 'vue';
+    import { onMounted, inject } from 'vue';
+    import { useRouter } from 'vue-router';
+    import { useUserStore } from '@/stores/userStore';
     import api from '@/api';
+
+    const router = useRouter()
+    const { setUsername, setAccess } = useUserStore();
+    const toggleNotification = inject('toggleNotification')
 
     function loginWithGithub() {
         const clientId = import.meta.env.VITE_OAUTH_CLIENT_ID;
@@ -18,12 +24,16 @@
         if (!code) {
             return
         }
-        console.log(code)
         try{
             const res = await api.post('/users/github/', { code: code });
-            console.log(res.data)
+            const data = res.data
+            setUsername(data.username)
+            setAccess(data.access)
+            toggleNotification('Login successful', 'success')
+            router.push('/projects')
         }
         catch(err){
+            toggleNotification('Something went wrong logging in. Please try again', 'error')
             console.error(err)
         }
     });
