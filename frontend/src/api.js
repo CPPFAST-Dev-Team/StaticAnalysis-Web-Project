@@ -10,8 +10,8 @@ const api = axios.create({
 api.interceptors.request.use(
     async (config) => {
       const userStore = useUserStore()
-      const token = localStorage.getItem('access') || userStore.access;
-      if (isAuthenticated()) {
+      const token = userStore.access;
+      if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       // Temporarily disabled refresh logic for testing

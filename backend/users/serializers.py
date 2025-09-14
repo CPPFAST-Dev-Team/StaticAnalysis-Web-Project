@@ -37,3 +37,9 @@ class GithubAuthSerializer(serializers.Serializer):
     access = serializers.CharField()
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     username = serializers.CharField()
+
+class GithubReposSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    language = serializers.CharField(allow_null=True)
+    repository_url = serializers.CharField()

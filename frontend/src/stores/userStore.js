@@ -17,10 +17,12 @@ export const useUserStore = defineStore('user', () => {
         const payload = JSON.parse(atob(access.value.split(".")[1]));
         const expirationTime = payload.exp * 1000
 
-        if(Date.now() < expirationTime){
+        // Check if the token is expired
+        if(Date.now() >= expirationTime){
             clearUser()
-            return true
+            return false
         }
+
         return Date.now() < expirationTime
     }
     function clearUser(){

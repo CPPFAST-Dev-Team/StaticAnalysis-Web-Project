@@ -12,8 +12,8 @@
             <input type="text" id="name" v-model="nameInput">
         </div>
         <div class="input-group">
-            <label for="repo">Repository Url</label>
-            <input type="text" id="repo" v-model="repoInput">
+            <label for="repo">Repository</label>
+            <RepoDropdown :options="userRepos" v-model="repoInput" selectFiller="Select Repository" />
         </div>
         <div class="input-group">
             <label for="description">Description</label>
@@ -31,60 +31,66 @@
 
 <script setup>
 import Loading from "../components/Loading.vue";
-import Dropdown from "../components/Dropdown.vue";
 import api from "../api"
 
-import axios from 'axios'
-import { ref, inject } from 'vue'
+import { ref, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import RepoDropdown from "@/components/RepoDropdown.vue";
 
 const nameInput = ref('')
-const repoInput = ref('')
+const repoInput = ref(null)
 const descriptionInput = ref('')
+const userRepos = ref([])
 const loading = ref(false)
 
 const router = useRouter();
 const toggleNotification = inject('toggleNotification')
 
+// Fetch user repositories from backend
+onMounted(async () => {
+    const fetchRepos = async () => {
+        api.get("/users/github/repos/").then((response) => {
+            userRepos.value = response.data
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+    fetchRepos()
+})
+
 async function createProject(){
     if(nameInput.value === ''){
-        toggleNotification('Please provid a project name', 'alert')
+        toggleNotification('Please provide a project name', 'alert')
+        return
     }
-    else if(!isValidURL(repoInput.value)){
-        toggleNotification('Please provid a valid url', 'alert')
+    else if(!repoInput.value){
+        toggleNotification('Please provide a valid repo', 'alert')
+        return
     }
     else if(descriptionInput.value === ''){
         toggleNotification('Please provide a project description', 'alert')
+        return
     }
-    else{
-        loading.value = true
-        try{
-            const formData = {
-                name: nameInput.value,
-                repository_url: repoInput.value,
-                description: descriptionInput.value,
-            }
-            await api.post("api/projects/", formData)
-            toggleNotification(`Project ${nameInput.value} successfully created`, 'success')
-            router.push('/projects')
+   
+    loading.value = true
+    try{
+        const formData = {
+            name: nameInput.value,
+            repository_url: repoInput.value.repository_url,
+            description: descriptionInput.value,
         }
-        catch(error){
-            console.log(error)
-        }
-        finally{
-            loading.value = false
-        }
+        await api.post("/projects/", formData)
+        toggleNotification(`Project ${nameInput.value} successfully created`, 'success')
+        router.push('/projects')
     }
-}
+    catch(error){
+        console.log(error)
+    }
+    finally{
+        loading.value = false
+    }
+    }
 
-function isValidURL(url) {
-    try {
-        new URL(url);
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
 
 </script>
 
@@ -124,15 +130,17 @@ function isValidURL(url) {
     justify-content: center;
     width: 100%;
     max-width: 500px;
+    font-size: 1.2rem;
 }
 
 .input-group input[type="text"] {
-    height: 30px;
+    padding: 5px;
     width: 100%;
     border: 1px solid #063970;
     border-radius: 5px;
     color: #063970;
     margin: 0;
+    font-size: 1.2rem;
 }
 .input-group textarea {
     height: 100px;
@@ -145,14 +153,14 @@ function isValidURL(url) {
     color: #063970;
     margin: 0;
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
+    font-size: 1.2rem;
 }
 
 .input-group label {
     margin: 0;
     font-family: 'DM Sans', sans-serif;
     color: #063970;
-    font-size: clamp(1rem, 50%, 2rem);
+    font-size: 1.2rem;
 }
 
 .create {

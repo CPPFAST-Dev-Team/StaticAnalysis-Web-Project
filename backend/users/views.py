@@ -5,9 +5,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, UserLoginSerializer, GithubAuthSerializer
+from .serializers import UserSerializer, UserLoginSerializer, GithubAuthSerializer, GithubReposSerializer
 
 class UserRegistrationView(generics.CreateAPIView):
     """
@@ -129,6 +130,7 @@ class GithubAuthAPIView(APIView):
         username = profile.get("login")
 
         # Step 3: Get or create a local user
+        # TODO: Handle potential username conflicts and create UserProfile if necessary
         user, _ = User.objects.get_or_create(username=username)
 
         # Step 4: Generate JWT
@@ -141,6 +143,37 @@ class GithubAuthAPIView(APIView):
             "username": user.username,
         }
         serializer = GithubAuthSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        print(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class GithubReposListView(APIView):
+    """
+    API view to fetch and return a list of Github repositiries for a given user
+    """
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        github_username = user.username
+
+        # Fetch repositories from Github API
+        repos_url = f"https://api.github.com/users/{github_username}/repos"
+        response = requests.get(repos_url)
+        if response.status_code != 200:
+            return Response({"error": "Failed to fetch repositories from GitHub"}, status=response.status_code)
+        repos = response.json()
+
+        # Serialize and return the repo data
+        data = []
+        for repo in repos:
+            data.append({
+                "id": repo["id"],
+                "name": repo["name"],
+                "language": repo["language"] if repo["language"] else None,
+                "repository_url": repo["html_url"],
+            })
+        serializer = GithubReposSerializer(data=data, many=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)

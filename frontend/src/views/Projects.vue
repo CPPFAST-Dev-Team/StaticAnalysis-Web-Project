@@ -74,10 +74,10 @@
 
     async function getProjects() {
         try {
-            const projectsResponse = await api.get("api/projects/")
+            const projectsResponse = await api.get("/projects/")
             const temp = []
             for (const project of projectsResponse.data) {
-                const vulnerabilities = await api.get(`api/projects/${project.id}/vulnerabilities/`)
+                const vulnerabilities = await api.get(`/projects/${project.id}/vulnerabilities/`)
 
                 const { SEVERE: high_vulnerabilities = 0, MEDIUM: medium_vulnerabilities = 0, LOW: low_vulnerabilities = 0 } =
                     vulnerabilities.data.reduce((acc, vulnerability) => {
